@@ -1,8 +1,8 @@
-import { CommonFields, EditData } from "../libs/base_types";
+import { CommonFields, EditData, Include } from "../libs/base_types";
 
 interface ContentPack {
     Format: string,
-    Changes: (CommonFields)[],
+    Changes: (CommonFields | Include)[],
     ConfigSchema?: { [index: string]: string }
     CustomLocations?: any[] // ignore
 }
@@ -10,7 +10,10 @@ interface ContentPack {
 interface ChangeAlter {
     alter: CommonChange, // 修改后的CommonChange对象
     dict: { [index: string]: string | null }, // 提取的字符串字典
-    fileContent?: string // 对于Load和Include类型的Change, 需要生成额外的文件内容
+    outputFile?: { // 对于Load和Include类型的Change, 需要生成额外的文件信息
+        path: string
+        content: string
+    }
 }
 
 interface CommonChange extends CommonFields {
@@ -26,7 +29,7 @@ class ChangeTraversor {
      * traverse
      * 遍历器返回一个ChangeObj对象，包含提取的StrDict和ChangeAlter
      */
-    public traverse(dialogueHandler?: (str: string, ...args: any[]) => string, ...args: any[]): ChangeAlter {
+    public traverse(strHandler?: (str: string, ...args: any[]) => string, ...args: any[]): ChangeAlter {
         const result: ChangeAlter = {
             alter: this.change,
             dict: {}
@@ -44,6 +47,7 @@ class ChangeTraversor {
             return str
         })()
         // TODO 判断Change属于哪个类型,并处理遍历
+        // TODO 目前不支持Include类型的代码
         if (this.change.Action == "EditData") {
             const change = this.change as EditData
             switch (change.Target) {
@@ -60,6 +64,7 @@ class ChangeTraversor {
                 default:
                     // TODO 遍历Fields
                     // TODO 遍历Entries
+                    // * TODO 可以将Entries抽象为EntriesHandler方法用于Load的代码复用
                     if (change.Entries) {
                         for (const [key, value] of Object.entries(change.Entries)) {
                             // 匹配dialogue
@@ -68,8 +73,8 @@ class ChangeTraversor {
                                     // 将字符串提取至字典
                                     result.dict[baseID + key] = value as string
                                     // 处理字符串
-                                    if (dialogueHandler) {
-                                        result.alter.Entries[key] = dialogueHandler(value as string, ...args)
+                                    if (strHandler) {
+                                        result.alter.Entries[key] = strHandler(value as string, ...args)
                                     }
                                 }
                             }
@@ -80,6 +85,9 @@ class ChangeTraversor {
             }
         }
         return result
+    }
+    private entriesHandler(strHandler?: (str: string, ...args: any[]) => string, ...args: any[]) {
+
     }
 }
 

@@ -1,5 +1,19 @@
-interface CommonFields {
+interface Action {
     Action: "Load" | "EditImage" | "EditData" | "EditMap" | "Include",
+}
+
+/**
+ * 相当于从文件粘贴代码
+ */
+interface Include extends Action {
+    Action: "Include",
+    FromFile: string
+}
+/**
+ * 实际生效的Change入口
+ */
+interface CommonFields extends Action {
+    Action: "Load" | "EditImage" | "EditData" | "EditMap",
     Target: string,
     When?: { [index: string]: string },
     LogName?: string,
@@ -40,11 +54,6 @@ interface EditMap extends CommonFields {
     MapTiles?: any
 }
 
-interface Include extends CommonFields {
-    Action: "Include",
-    FromFile: string
-}
-
 
 // ---sub class---
 interface TextOperations {
@@ -70,13 +79,16 @@ interface EntriesListAssets {
 }
 
 export {
+    // ---works like a folder---
+    Include,
+    // ---common fields---
     CommonFields,
+    // ---with common fields---
     EditData,
     EditImage,
     EditMap,
     Load,
-    Include,
-    // ---sub class---
+    // ---sub type---
     EntriesMoviesModel,
     EntriesListAssets,
     TextOperations
