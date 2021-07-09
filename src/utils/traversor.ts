@@ -1,4 +1,4 @@
-import { CommonFields } from "../libs/base_types";
+import { CommonFields, EditData } from "../libs/base_types";
 
 interface ContentPack {
     Format: string,
@@ -7,16 +7,14 @@ interface ContentPack {
     CustomLocations?: any[] // ignore
 }
 
-interface StrDict {
-    [index: string]: { // 字符串ID
-        Origin: string, // Mod中直接提取的字符串
-        Alter: string[] // 经过Handler处理的字符串(列表)
-    }
+interface ChangeAlter {
+    alter: CommonChange, // 修改后的CommonChange对象
+    dict: { [index: string]: string | null }, // 提取的字符串字典
+    fileContent?: string // 对于Load和Include类型的Change, 需要生成额外的文件内容
 }
 
-interface ChangeObj {
-    obj: CommonFields,
-    dict: StrDict
+interface CommonChange extends CommonFields {
+    [index: string]: any
 }
 
 class ChangeTraversor {
@@ -26,18 +24,88 @@ class ChangeTraversor {
     }
     /**
      * traverse
-     * 遍历器返回一个ChangeObj对象，包含提取的StrDict和处理后的ChangeObj
+     * 遍历器返回一个ChangeObj对象，包含提取的StrDict和ChangeAlter
      */
-    public traverse(): ChangeObj {
-        const result: ChangeObj = {
-            obj: this.change,
+    public traverse(dialogueHandler?: (str: string, ...args: any[]) => string, ...args: any[]): ChangeAlter {
+        const result: ChangeAlter = {
+            alter: this.change,
             dict: {}
         }
+        // TODO 计算baseID
+        const baseID = this.change.Action + this.change.Target + "[When]" + (() => {
+            let str = ""
+            if (this.change.When) {
+                for (const [key, value] of Object.entries(this.change.When)) {
+                    if (key.toLowerCase() != "language") {
+                        str += key + value
+                    }
+                }
+            }
+            return str
+        })()
         // TODO 判断Change属于哪个类型,并处理遍历
-
-
+        if (this.change.Action == "EditData") {
+            const change = this.change as EditData
+            switch (change.Target) {
+                case "Data/Movies":
+                    // TODO Entries为数据模型
+                    break;
+                case "Data/ConcessionTastes":
+                case "Data/FishPondData":
+                case "Data/MoviesReactions":
+                case "Data/TailoringRecipes":
+                    // TODO Entries为数据列表
+                    // 这个部分的数据可能会包含MoveEntries的索引
+                    break;
+                default:
+                    // TODO 遍历Fields
+                    // TODO 遍历Entries
+                    if (change.Entries) {
+                        for (const [key, value] of Object.entries(change.Entries)) {
+                            // 匹配dialogue
+                            if (regex_dialogue_target.test(change.Target)) {
+                                if (value) {
+                                    // 将字符串提取至字典
+                                    result.dict[baseID + key] = value as string
+                                    // 处理字符串
+                                    if (dialogueHandler) {
+                                        result.alter.Entries[key] = dialogueHandler(value as string, ...args)
+                                    }
+                                }
+                            }
+                            // TODO 匹配其它Target
+                        }
+                    }
+                    break;
+            }
+        }
         return result
     }
 }
 
-export { ChangeTraversor, StrDict }
+/**
+ * - Character-specific dialogue
+ * - Marriage dialogue
+ * * 大部分包含dialogue
+ */
+const regex_dialogue_target = /Characters(\/|\\)Dialogue(\/|\\).*/i
+
+/**
+ * - Event files
+ * * 大部分包含dialogue
+ */
+const regex_event_target = /Data(\/|\\)Events(\/|\\).*/i
+
+/**
+ * - Animation descriptions
+ * ? 有一小部分包含dialogue
+*/
+const regex_animation_target = /Data(\/|\\)AnimationDescriptions/i
+
+/**
+ * - Strings from CS files
+ * ? 有一小部分包含dialogue
+ */
+const regex_strings_from_cs_files_target = /Strings(\/|\\)StringsFromCSFiles/i
+
+export { ChangeTraversor, regex_dialogue_target, regex_event_target }

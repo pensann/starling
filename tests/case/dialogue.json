@@ -1,0 +1,9 @@
+{
+    "Action": "EditData",
+    "Target": "Characters/Dialogue/MarriageDialogueSophia",
+    "When": { "Date": "Summer 1" },
+    "Entries": {
+    "funReturn_Sophia": "Dinner is served! [727 231 207 199]$1#$e#Um! Did you have a nice day?$9",
+    "funLeave_Sophia": "Hey, you! It's the first and busiest day of the season! Good luck today!$9#$e#I'll make dinner tonight. Don't worry.$1",
+      }
+  }

@@ -15,7 +15,7 @@ interface Load extends CommonFields {
 interface EditData extends CommonFields {
     Action: "EditData",
     Fields?: string, // TODO!
-    Entries?: { [index: string]: string | EntriesMoviesModel | EntriesListAssets },
+    Entries?: { [index: string]: string | null | EntriesMoviesModel | EntriesListAssets },
     MoveEntries?: { [index: string]: string },
     TextOperations?: TextOperations[]
 }
