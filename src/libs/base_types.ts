@@ -1,18 +1,18 @@
-interface Action {
+interface BaseChange {
     Action: "Load" | "EditImage" | "EditData" | "EditMap" | "Include",
 }
 
 /**
  * 相当于从文件粘贴代码
  */
-interface Include extends Action {
+interface Include extends BaseChange {
     Action: "Include",
     FromFile: string
 }
 /**
  * 实际生效的Change入口
  */
-interface CommonFields extends Action {
+interface CommonFields extends BaseChange {
     Action: "Load" | "EditImage" | "EditData" | "EditMap",
     Target: string,
     When?: { [index: string]: string },
@@ -79,6 +79,7 @@ interface EntriesListAssets {
 }
 
 export {
+    BaseChange,
     // ---works like a folder---
     Include,
     // ---common fields---

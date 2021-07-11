@@ -1,4 +1,4 @@
-import { regex_dialogue_target, regex_event_target, } from "../src/utils/traversor";
+import { regex_dialogue_target, regex_event_target, } from "../../src/utils/traversor";
 
 
 describe("Parser Testing", () => {

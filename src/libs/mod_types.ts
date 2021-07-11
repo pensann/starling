@@ -1,0 +1,12 @@
+class SMAPI {
+    "Name"?: "<your project name>"
+    "Author"?: "<your name>"
+    "Version"?: "1.0.0"
+    "Description"?: "<One or two sentences about the mod>"
+    "UniqueID": "<your name>.<your project name>"
+    "EntryDll": "<your project name>.dll"
+    "MinimumApiVersion"?: "3.0.0"
+    "UpdateKeys"?: []
+}
+
+class ContentPatcher { }

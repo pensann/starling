@@ -1,5 +1,5 @@
 import { parseJSON } from "../src/utils/parser";
-import { ChangeTraversor, StrDict } from "../src/utils/traversor";
+import { ChangeTraversor } from "../src/utils/traversor";
 import { CommonFields } from "../src/libs/base_types";
 
 
@@ -76,9 +76,4 @@ const answer_json2 =
         "Blue Squid": { 0: 80, 1: 30 },
     },
     "When": { "StrongerMonsters": true }
-}
-
-const answer_str: StrDict["Origin"] = {
-    Origin: "",
-    Alter: []
 }
