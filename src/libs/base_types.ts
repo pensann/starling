@@ -1,7 +1,6 @@
 interface BaseChange {
     Action: "Load" | "EditImage" | "EditData" | "EditMap" | "Include",
 }
-
 /**
  * 相当于从文件粘贴代码
  */
@@ -78,19 +77,21 @@ interface EntriesListAssets {
     [index: string]: any // TODO
 }
 
-export {
-    BaseChange,
-    // ---works like a folder---
-    Include,
-    // ---common fields---
-    CommonFields,
-    // ---with common fields---
-    EditData,
-    EditImage,
-    EditMap,
-    Load,
-    // ---sub type---
-    EntriesMoviesModel,
-    EntriesListAssets,
-    TextOperations
+
+interface MoviesReactionEntries {
+    [index: string]: {
+        NPCName: string,
+        Reactions: {
+            ID: string,
+            Tag: string,
+            Response: string
+            Whitelist: any[],
+            SpecialResponses: null | {
+                [index: string]: {
+                    Text?: string
+                    [index: string]: string | undefined
+                }
+            },
+        }[]
+    }
 }
