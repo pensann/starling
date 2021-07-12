@@ -60,7 +60,12 @@ class ChangeTraversor {
         }
         for (const [key, value] of Object.entries(entries)) {
             // 匹配dialogue
-            if (regex_dialogue_target.test(target)) {
+            if (
+                regexp_dialogue.test(target)
+                || regexp_strings_from_cs_files.test(target)
+                || regexp_data_mail.test(target)
+                || regexp_data_strings_from_maps.test(target)
+            ) {
                 if (value && this.re.test(value)) {
                     // 将字符串提取至字典
                     result.dict[baseID + key] = value
@@ -71,20 +76,22 @@ class ChangeTraversor {
                 }
             }
             // 匹配Event
-            else if (regex_event_target.test(target)) {
+            else if (regexp_event.test(target)) {
                 if (value && this.re.test(value)) {
                     // 将字符串提取至字典
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0
-                    eventAlter.strLi.forEach(evnetStr => {
-                        result.dict[baseID + key + "-#" + n] = eventAlter.strLi[0]
-                        result.alterEntries[key] = eventAlter.alterStr
-                        n = +1
-                    })
+                    // TODO 这里可以手写遍历，不使用迭代
+                    while (n < eventAlter.strLi.length) {
+                        result.dict[baseID + key + "-#" + n] = eventAlter.strLi[n]
+                        n += 1
+                    }
+                    // TODO 这里有问题
+                    result.alterEntries[key] = eventAlter.alterStr
                 }
             }
             // 匹配NPCDispositions
-            else if (regex_npc_dispositions.test(target)) {
+            else if (regexp_npc_dispositions.test(target)) {
                 if (value && this.re.test(value)) {
                     result.alterEntries[key] = value.replace(/\/[^\/]*?$/g, (str: string) => {
                         // 将字符串提取至字典
@@ -115,7 +122,6 @@ class ChangeTraversor {
         }
 
         for (const [keyEntry, valueObj] of Object.entries(entries)) {
-            // !!DOING
             let n = 0
             valueObj.Reactions.forEach((reaction) => {
                 if (reaction.SpecialResponses) {
@@ -265,40 +271,23 @@ function str_translator(str: string, dict: { [index: string]: string }) {
     return dict[str] ? dict[str] : str
 }
 
-/**
- * - Character-specific dialogue
- * - Marriage dialogue
- * * 大部分包含dialogue
- */
-const regex_dialogue_target = /(Characters(\/|\\)Dialogue(\/|\\).*|Strings(\/|\\)Schedules(\/|\\).*)/i
+// 直接提取字符串
+const regexp_dialogue = /Characters(\/|\\\\)Dialogue(\/|\\\\).*/i
+const regexp_strings_from_cs_files = /Strings(\/|\\\\)StringsFromCSFiles/i
+const regexp_data_mail = /Data(\/|\\\\)Mail/i
+const regexp_data_strings_from_maps = /Strings(\/|\\\\)StringsFromMaps/i
 
-/**
- * - Event files
- * * 大部分包含dialogue
- */
-const regex_event_target = /Data(\/|\\)Events(\/|\\).*/i
+// ? 据说含有dialogue，但SVE没有
+const regexp_strings_schedule = /Strings(\/|\\\\)Schedules(\/|\\\\).*/i
+const regexp_animation = /Data(\/|\\\\)AnimationDescriptions/i
+const regexp_data_npc_gift_tastes = /Data(\/|\\\\)NPCGiftTastes/i
 
-/**
- * - Animation descriptions
- * ? 有一小部分包含dialogue
-*/
-const regex_animation_target = /Data(\/|\\)AnimationDescriptions/i
+// ! 特殊格式
+const regexp_event = /Data(\/|\\\\)Events(\/|\\\\).*/i
 
-/**
- * - Strings from CS files
- * ? 有一小部分包含dialogue
- */
-const regex_strings_from_cs_files_target = /Strings(\/|\\)StringsFromCSFiles/i
+// ! "/"隔开，取最后一个区间
+const regexp_npc_dispositions = /Data(\/|\\\\)NPCDispositions/i
 
-
-/**
- * - "/"隔开的特殊格式
- */
-const regex_npc_dispositions = /Data(\/|\\)NPCDispositions/i
-
-// TODO Data/Mail
-// TODO Data/NPCGiftTastes
-// TODO Strings/StringsFromMaps
 // * Do more here...
 
 
