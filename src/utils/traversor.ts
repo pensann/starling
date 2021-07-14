@@ -41,8 +41,8 @@ class ChangeTraversor {
         baseID: string,
         target: string,
         entries: EntriesAlter["alterEntries"],
-        strHandler?: (str: string, ...args: any[]) => string,
-        ...args: any[]): EntriesAlter {
+        strHandler?: (str: string, ...args: any[]) => string, ...args: any[]
+    ): EntriesAlter {
         const result: EntriesAlter = {
             alterEntries: entries,
             dict: {}
@@ -284,7 +284,7 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
 
 /**
  * 翻译器，查找字典中传入字符串的翻译。  
- * *若字典中未找到翻译，则返回`原字符串`
+ * * 若字典中未找到翻译，则返回`原字符串`
  */
 function str_translator(str: string, dict: { [index: string]: string }) {
     return dict[str] ? dict[str] : str

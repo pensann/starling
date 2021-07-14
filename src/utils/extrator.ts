@@ -1,6 +1,7 @@
 import { dirname } from "path";
 import { parseJSON } from "./parser";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
+import { DialogueStr } from "./str";
 
 function extractModStr(contentFile: string, re?: RegExp) {
     const result: DictKV = {}
@@ -19,15 +20,21 @@ function extractModStr(contentFile: string, re?: RegExp) {
 
 function mergeDict(dictOrigin: DictKV, ...dictAlter: DictKV[]): DictAlter {
     const result: DictAlter = {}
+    let index = 0
     for (const [key, value] of Object.entries(dictOrigin)) {
         // 提取origin字段
-        result[key]["origin"] = value
+        result[index] = {
+            id: key,
+            origin: value,
+            alter: []
+        }
         // 提取alter字段
         dictAlter.forEach(alter => {
             if (alter[key]) {
-                result[key]["alter"].push(alter[key])
+                result[index]["alter"].push(alter[key])
             }
         })
+        index += 1
     }
     return result
 }

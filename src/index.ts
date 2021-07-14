@@ -1,5 +1,5 @@
 
-import { extractModStr } from "./utils/extrator";
+// import { extractModStr } from "./utils/extrator";
 
 
 // const eng = "res/-Stardew Valley Expanded--3753-1-13-8-1625195234/Stardew Valley Expanded/[CP] Stardew Valley Expanded/content.json"
@@ -18,19 +18,20 @@ import { extractModStr } from "./utils/extrator";
 // 解压模组字典
 // import { extractModStr } from "./utils/extrator"
 // const eng = "res/SVE/Stardew Valley Expanded/[CP] Stardew Valley Expanded/content-backup.json"
-const eng_file = "res/dict_eng.json"
-import { writeFileSync } from "fs";
+// const eng_file = "res/dict_eng.json"
 // extractModStr(eng, eng_file)
 
 
 // 通过模组字典
 import { parseJSON } from "./utils/parser";
-import { buildAlterFromDict } from "./utils/project-builder";
+import { mergeDict } from "./utils/extrator";
+import { buildTarget } from "./utils/builder";
+const eng_file = "res/dict_eng.json"
 const dict_eng = parseJSON(eng_file)
+// buildTarget("res/dict.json", JSON.stringify(mergeDict(dict_eng), undefined, 4))
 
-buildAlterFromDict("res/dict2.json", dict_eng)
-writeFileSync()
-
+import { dump } from "js-yaml";
+buildTarget("res/dict.yaml", dump(mergeDict(dict_eng)))
 
 
 

@@ -5,7 +5,8 @@ interface DictKV {
 
 /** 由ID字符串做索引的改动字典 */
 interface DictAlter {
-    [index: string]: {
+    [index: number]: {
+        id: string
         origin: string
         alter: string[]
     }
