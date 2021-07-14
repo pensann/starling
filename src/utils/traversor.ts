@@ -1,31 +1,20 @@
 import { resolve, join, extname } from "path";
 import { parseJSON } from "./parser";
-interface CommonChange extends CommonFields {
-    [index: string]: any
-}
-
-interface ChangeAlter {
-    alter: CommonChange, // 修改后的CommonChange对象
-    dict: Dict, // 提取的字符串字典
-}
-
-interface EntriesAlter {
-    alterEntries: { [index: string]: string | null },
-    dict: Dict // 提取的字符串字典
-}
-
-interface MoviesReactionEntriesAlter {
-    alterEntries: MoviesReactionEntries,
-    dict: Dict
-}
-
-interface Dict { [index: string]: string }
-
+import {
+    regexp_dialogue,
+    regexp_data_mail,
+    regexp_data_strings_from_maps,
+    regexp_strings_from_csfiles,
+    regexp_events,
+    regexp_festivals,
+    regexp_npc_dispositions,
+    regexp_data_npc_gift_tastes
+} from "../libs/regex"
 class ChangeTraversor {
     public change: CommonChange
     public re: RegExp
     constructor(change: CommonFields, re?: RegExp) {
-        this.re = re ? re : /.*/gm
+        this.re = re ? re : /./gm
         this.change = change
     }
 
@@ -62,8 +51,8 @@ class ChangeTraversor {
             // 匹配dialogue
             if (
                 regexp_dialogue.test(target)
-                || regexp_strings_from_cs_files.test(target)
                 || regexp_data_mail.test(target)
+                || regexp_strings_from_csfiles.test(target)
                 || regexp_data_strings_from_maps.test(target)
             ) {
                 if (value && this.re.test(value)) {
@@ -76,33 +65,63 @@ class ChangeTraversor {
                 }
             }
             // 匹配Event
-            else if (regexp_event.test(target)) {
+            else if (
+                regexp_events.test(target)
+                || regexp_festivals.test(target)
+            ) {
                 if (value && this.re.test(value)) {
-                    // 将字符串提取至字典
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0
-                    // TODO 这里可以手写遍历，不使用迭代
+                    // JS对于已知长度的List手写遍历的性能比迭代器好
                     while (n < eventAlter.strLi.length) {
-                        result.dict[baseID + key + "-#" + n] = eventAlter.strLi[n]
+                        // 将字符串提取至字典
+                        if (eventAlter.strLi[n]) { result.dict[baseID + key + "-#" + n] = eventAlter.strLi[n] }
                         n += 1
                     }
-                    // TODO 这里有问题
                     result.alterEntries[key] = eventAlter.alterStr
                 }
             }
             // 匹配NPCDispositions
             else if (regexp_npc_dispositions.test(target)) {
                 if (value && this.re.test(value)) {
-                    result.alterEntries[key] = value.replace(/\/[^\/]*?$/g, (str: string) => {
-                        // 将字符串提取至字典
-                        const s_real = str.substring(1)
-                        result.dict[baseID + key] = s_real
-                        if (strHandler) {
-                            // 处理字符串
-                            str = "/" + strHandler(s_real, ...args)
+                    const strLi = value.split("/")
+                    if (strLi.length) {
+                        const index = strLi.length - 1
+                        // 原字符串提取到字典
+                        if (strLi[index]) {
+                            result.dict[baseID + key] = strLi[index]
+                            if (strHandler) {
+                                // 处理字符串
+                                strLi[index] = strHandler(strLi[index], ...args)
+                            }
                         }
-                        return str
-                    })
+                    }
+                    // ? （可能有问题）处理后的字符串输出到alter
+                    result.alterEntries[key] = strLi.join("/")
+                }
+            }
+            // 匹配GiftTastes
+            else if (regexp_data_npc_gift_tastes.test(target)) {
+                if (value && this.re.test(value)) {
+                    const strLi = value.split("/")
+                    if (strLi.length) {
+                        let n = 0
+                        // 遍历字符串文字，其中模2片段为需要翻译的字符串
+                        while (n < strLi.length) {
+                            if (!(n % 2)) {
+                                if (strLi[n]) {
+                                    // 原字符串提取到字典
+                                    result.dict[baseID + key + "-#" + n] = strLi[n]
+                                    // 处理字符串
+                                    if (strHandler) {
+                                        strLi[n] = strHandler(strLi[n], ...args)
+                                    }
+                                }
+                            }
+                            n += 1
+                        }
+                        result.alterEntries[key] = strLi.join("/")
+                    }
                 }
             }
             // TODO 匹配其它Target
@@ -249,7 +268,7 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
         return matchList ? matchList.length : 0
     })()
     if (qtMarkNum % 2) {
-        console.log("[\x1B[38;5;208mWARNING\x1B[0m] 字符串包含奇数引号，使用全字匹配模式...")
+        console.log("[\x1B[38;5;208mWARNING\x1B[0m] 文本包含未闭合引号，使用全字匹配模式...")
         console.log(`\x1B[38;5;65m${str}\x1B[0m`)
         result.strLi.push(str)
         if (strHandler) { result.alterStr = strHandler(str, ...args) }
@@ -270,25 +289,6 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
 function str_translator(str: string, dict: { [index: string]: string }) {
     return dict[str] ? dict[str] : str
 }
-
-// 直接提取字符串
-const regexp_dialogue = /Characters(\/|\\\\)Dialogue(\/|\\\\).*/i
-const regexp_strings_from_cs_files = /Strings(\/|\\\\)StringsFromCSFiles/i
-const regexp_data_mail = /Data(\/|\\\\)Mail/i
-const regexp_data_strings_from_maps = /Strings(\/|\\\\)StringsFromMaps/i
-
-// ? 据说含有dialogue，但SVE没有
-const regexp_strings_schedule = /Strings(\/|\\\\)Schedules(\/|\\\\).*/i
-const regexp_animation = /Data(\/|\\\\)AnimationDescriptions/i
-const regexp_data_npc_gift_tastes = /Data(\/|\\\\)NPCGiftTastes/i
-
-// ! 特殊格式
-const regexp_event = /Data(\/|\\\\)Events(\/|\\\\).*/i
-
-// ! "/"隔开，取最后一个区间
-const regexp_npc_dispositions = /Data(\/|\\\\)NPCDispositions/i
-
-// * Do more here...
 
 
 export { EditDataTraversor, LoadTraversor }

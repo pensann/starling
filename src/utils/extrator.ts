@@ -1,36 +1,50 @@
-import { existsSync, mkdirSync, writeFileSync } from "fs";
-import { dirname, resolve } from "path";
+import { dirname } from "path";
 import { parseJSON } from "./parser";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
 
-function extractModStr(contentFile: string, target: string, re?: RegExp) {
+function extractModStr(contentFile: string, re?: RegExp) {
+    const result: DictKV = {}
     const content = parseJSON(contentFile) as ContentPack
-    const dir = dirname(target)
-    if (!existsSync(dir)) mkdirSync_P(dir)
-    if (existsSync(target)) { console.log("[\x1B[38;5;208mWARNING\x1B[0m] 目标存在，覆盖文件: ", resolve(target)) }
-    const di: any = {}
     content.Changes.forEach((change) => {
         if (change.Action == "EditData") {
             const traversor = new EditDataTraversor(change, re)
-            Object.assign(di, traversor.traverse().dict)
+            Object.assign(result, traversor.traverse().dict)
         } else if (change.Action == "Load") {
             const traversor = new LoadTraversor(change, dirname(contentFile), re)
-            Object.assign(di, traversor.traverse().dict)
+            Object.assign(result, traversor.traverse().dict)
         }
     })
-    writeFileSync(target, JSON.stringify(di, undefined, 4))
+    return result
 }
 
-function mkdirSync_P(folderPath: string) {
-    if (existsSync(folderPath)) {
-        return true;
-    } else {
-        if (mkdirSync_P(dirname(folderPath))) {
-            console.log("[\x1B[38;5;44mINFO\x1B[0m] 创建文件夹: ", resolve(folderPath))
-            mkdirSync(folderPath);
-            return true;
-        }
+function mergeDict(dictOrigin: DictKV, ...dictAlter: DictKV[]): DictAlter {
+    const result: DictAlter = {}
+    for (const [key, value] of Object.entries(dictOrigin)) {
+        // 提取origin字段
+        result[key]["origin"] = value
+        // 提取alter字段
+        dictAlter.forEach(alter => {
+            if (alter[key]) {
+                result[key]["alter"].push(alter[key])
+            }
+        })
     }
+    return result
 }
 
-export { extractModStr }
+export { extractModStr, mergeDict }
+
+// * 字符串处理的示例代码
+// const regexLi = [
+//     regexp_dialogue,
+//     regexp_strings_from_csfiles,
+//     regexp_events,
+//     regexp_festivals
+// ]
+// regexLi.forEach(regex => {
+//     if (regex.test(key)) {
+//         const dialogueStr = new DialogueStr(value)
+//         // TODO 将经过美化的格式生成到字典
+//         console.log(dialogueStr.strBeauty)
+//     }
+// })
