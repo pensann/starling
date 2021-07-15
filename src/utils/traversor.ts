@@ -1,4 +1,5 @@
 import { resolve, join, extname } from "path";
+import { StarLog, LOG } from "./log";
 import { parseJSON } from "./parser";
 import {
     regexp_dialogue,
@@ -268,8 +269,7 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
         return matchList ? matchList.length : 0
     })()
     if (qtMarkNum % 2) {
-        console.log("[\x1B[38;5;208mWARNING\x1B[0m] 文本包含未闭合引号，使用全字匹配模式...")
-        console.log(`\x1B[38;5;65m${str}\x1B[0m`)
+        StarLog(LOG.WARN, "文本包含未闭合引号，使用全字匹配模式...\n\x1B[38;5;65m${str}\x1B[0m")
         result.strLi.push(str)
         if (strHandler) { result.alterStr = strHandler(str, ...args) }
     }

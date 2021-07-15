@@ -1,5 +1,5 @@
 class DialogueStr {
-    protected str: string
+    public str: string
     constructor(str: string) {
         this.str = str
     }
@@ -9,27 +9,18 @@ class DialogueStr {
             .replaceAll(/#\$r/gm, wrapAndIndent)
     }
     public get strCompressed() { return this.str }
+    public get trait() {
+        return this.strCompressed
+            .replaceAll(
+                /\$(k|h|s|u|l|a)/gm,
+                str => { return this.portrait_alias[str] }
+            )
+            .match(this.traitRgexp)?.join("/")
+            .replaceAll(/\s+/gm, "_")
+    }
     public fromString(str: string) {
         this.str = str.replaceAll(/\n\s*/g, "")
     }
-    private marks = [
-        "@",
-        "%adj",
-        "%noun",
-        "%place",
-        "%spouse",
-        "%name",
-        "%firstnameletter",
-        "%time",
-        "%band",
-        "%book",
-        "%rival",
-        "%pet",
-        "%farm",
-        "%favorite",
-        "%kid1",
-        "%kid2"
-    ]
     private portrait_alias = {
         "$k": "$0",
         "$h": "$1",
@@ -37,7 +28,8 @@ class DialogueStr {
         "$u": "$3",
         "$l": "$4",
         "$a": "$5"
-    }
+    } as { [index: string]: string }
+    private traitRgexp = /{{[^{}]*?}}|#|@|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 
 
