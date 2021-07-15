@@ -1,5 +1,7 @@
+import { load } from "js-yaml";
 import { readFileSync } from "fs"
 import { stripComments } from "jsonc-parser"
+
 import jsonic = require("jsonic")
 
 /** 返回无BOM头的字符串 */
@@ -24,4 +26,9 @@ function parseJSON(path: string, encoding: BufferEncoding = "utf-8") {
     }
 }
 
-export { parseJSON }
+function parseYML(path: string, encoding: BufferEncoding = "utf-8") {
+    return load(readFileSync(path, encoding))
+}
+
+
+export { parseJSON, parseYML }

@@ -1,7 +1,7 @@
 class DialogueStr {
     protected str: string
     constructor(str: string) {
-        this.str = str.replaceAll(/\n\s*/g, "")
+        this.str = str
     }
     public get strBeauty() {
         return this.str
@@ -9,6 +9,9 @@ class DialogueStr {
             .replaceAll(/#\$r/gm, wrapAndIndent)
     }
     public get strCompressed() { return this.str }
+    public fromString(str: string) {
+        this.str = str.replaceAll(/\n\s*/g, "")
+    }
     private marks = [
         "@",
         "%adj",

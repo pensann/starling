@@ -1,7 +1,6 @@
 import { dirname } from "path";
 import { parseJSON } from "./parser";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
-import { DialogueStr } from "./str";
 
 function extractModStr(contentFile: string, re?: RegExp) {
     const result: DictKV = {}
@@ -19,7 +18,7 @@ function extractModStr(contentFile: string, re?: RegExp) {
 }
 
 function mergeDict(dictOrigin: DictKV, ...dictAlter: DictKV[]): DictAlter {
-    const result: DictAlter = {}
+    const result = new DictAlter()
     let index = 0
     for (const [key, value] of Object.entries(dictOrigin)) {
         // 提取origin字段
@@ -39,19 +38,23 @@ function mergeDict(dictOrigin: DictKV, ...dictAlter: DictKV[]): DictAlter {
     return result
 }
 
-export { extractModStr, mergeDict }
+class DictAlter {
+    [index: number]: {
+        id: string
+        origin: string
+        alter: string[]
+    }
+    public toDictKV() {
+        const result: DictKV = {}
+        for (const [key, value] of Object.entries(this)) {
+            if (key && value && value["origin"]
+                && value["alter"] && value["alter"].length != 0
+            ) {
+                result[value["origin"]] = value["alter"][0]
+            }
+        }
+        return result
+    }
+}
 
-// * 字符串处理的示例代码
-// const regexLi = [
-//     regexp_dialogue,
-//     regexp_strings_from_csfiles,
-//     regexp_events,
-//     regexp_festivals
-// ]
-// regexLi.forEach(regex => {
-//     if (regex.test(key)) {
-//         const dialogueStr = new DialogueStr(value)
-//         // TODO 将经过美化的格式生成到字典
-//         console.log(dialogueStr.strBeauty)
-//     }
-// })
+export { extractModStr, mergeDict, DictAlter }

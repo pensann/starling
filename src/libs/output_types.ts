@@ -3,15 +3,6 @@ interface DictKV {
     [index: string]: string
 }
 
-/** 由ID字符串做索引的改动字典 */
-interface DictAlter {
-    [index: number]: {
-        id: string
-        origin: string
-        alter: string[]
-    }
-}
-
 /** 包含修改后的Change和包含的字符串字典 */
 interface ChangeAlter {
     alter: CommonChange, // 修改后的CommonChange对象
