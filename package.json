@@ -23,8 +23,10 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "@types/xml2js": "^0.4.9",
     "jsonc-parser": "^3.0.0",
-    "jsonic": "^1.0.1"
+    "jsonic": "^1.0.1",
+    "xml2js": "^0.4.23",
+    "xmlbuilder2": "^2.4.1"
   }
 }

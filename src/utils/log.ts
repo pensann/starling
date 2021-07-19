@@ -6,6 +6,7 @@ enum LOG {
     DEBUG
 }
 
+// curl -s https://gist.githubusercontent.com/HaleTom/89ffe32783f89f403bba96bd7bcd1263/raw/ | bash
 function StarLog(level: LOG, ...str: string[]) {
     let prefix = ""
     switch (level) {
@@ -17,6 +18,9 @@ function StarLog(level: LOG, ...str: string[]) {
             break;
         case LOG.ERROR:
             prefix = "[\x1B[38;5;1mERROR\x1B[0m]"
+            break
+        case LOG.DEBUG:
+            prefix = "[\x1B[38;5;2mDEBUG\x1B[0m]"
             break
         default:
             break;

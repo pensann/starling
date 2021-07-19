@@ -1,6 +1,6 @@
-import { load } from "js-yaml";
 import { readFileSync } from "fs"
 import { stripComments } from "jsonc-parser"
+import { Parser } from "xml2js"
 
 import jsonic = require("jsonic")
 
@@ -26,9 +26,16 @@ function parseJSON(path: string, encoding: BufferEncoding = "utf-8") {
     }
 }
 
-function parseYML(path: string, encoding: BufferEncoding = "utf-8") {
-    return load(readFileSync(path, encoding))
+function parseXMLStr(str: string) {
+    const parser = new Parser()
+    const entries: DictKV = {}
+    parser.parseString(str, (err: string, res: any) => {
+        if (err) throw err
+        res.entries.entry.forEach((entry: any) => {
+            entries[entry.$.id] = entry._
+        })
+    })
+    return entries
 }
 
-
-export { parseJSON, parseYML }
+export { parseJSON, parseXMLStr }

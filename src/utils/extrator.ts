@@ -1,8 +1,12 @@
-import { dirname } from "path";
-import { LOG, StarLog } from "./log";
-import { parseJSON } from "./parser";
+import { create } from "xmlbuilder2"
+import { dirname, join, resolve } from "path";
+import { readFileSync } from "fs";
+
+import { buildTarget } from "./builder";
 import { DialogueStr } from "./str";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
+import { LOG, StarLog } from "./log";
+import { parseJSON, parseXMLStr } from "./parser";
 
 function extractModStr(contentFile: string, re?: RegExp) {
     const result: DictKV = {}
@@ -19,7 +23,7 @@ function extractModStr(contentFile: string, re?: RegExp) {
     return result
 }
 
-function mergeDict(dictOrigin: DictKV, ...otherDict: DictKV[]): DictAlter {
+function mergeDict(dictOrigin: DictKV, dictOther: DictKV): DictAlter {
     const result = new DictAlter()
     let index = 0
     for (const [key, value] of Object.entries(dictOrigin)) {
@@ -27,59 +31,104 @@ function mergeDict(dictOrigin: DictKV, ...otherDict: DictKV[]): DictAlter {
         result[index] = {
             id: key,
             origin: value,
-            alter: []
+            alter: dictOther[key]
         }
-        // 提取alter字段
-        otherDict.forEach(dict => {
-            if (dict[key]) {
-                result[index]["alter"].push(dict[key])
-            }
-        })
         index += 1
     }
     return result
 }
 
-class DictAlter {
-    [index: number]: {
-        id: string
-        origin: string
-        alter: string[]
+function convertToXMLStr(entries: DictKV, space?: string | number, attr?: { [index: string]: string | undefined }) {
+    let indent: string | undefined
+    if (typeof (space) == "number") {
+        indent = " ".repeat(space)
+    } else {
+        indent = space ? space : " ".repeat(2)
     }
-    public toDictKV() {
+    const root = create({ encoding: "utf-8" })
+        .ele('entries', attr)
+    for (const [key, value] of Object.entries(entries)) {
+        const valueBeauty =
+            "\n" + indent.repeat(2)
+            + value.replace(/\n/g, "\n" + indent.repeat(2))
+            + "\n" + indent
+        root.ele("entry", { id: key }).txt(valueBeauty)
+    }
+    return root.end({ prettyPrint: true, indent: indent })
+}
+
+class DictAlter {
+    [index: number]: DictAlterValue
+    public toDictKV(srcFolder: string) {
         const result: DictKV = {}
         for (const [key, value] of Object.entries(this) as [string, DictAlterValue][]) {
-            if (key && value && value.origin
-                && value.alter && value.alter.length != 0
-            ) {
-                /**
-                 * 如果有alter字段，则分析alter字段是否是一个有效翻译。
-                 * * 另外，不能使用forEach遍历，因为不能用return中断
-                 */
-                for (let index = 0; index < value.alter.length; index++) {
-                    const element = value.alter[index]
-                    const originStr = new DialogueStr(value.origin)
-                    const alterStr = new DialogueStr(element)
-                    /** 有效翻译：包含相同Trait的第一个alter */
-                    if (originStr.trait == alterStr.trait) {
-                        // 注意这里的key使用原字符串str做索引
-                        result[originStr.str] = alterStr.strCompressed
-                        return // 这里应该只会return掉for循环
-                    }
-                    else {
-                        StarLog(LOG.WARN, "字符串特征不符合\n" + alterStr.str)
-                    }
-                }
+            if (value.alterFile) {
+                // ? 如果有alterFile，根据srcFolder读取AlterFile
+                result[value.origin] = parseXMLStr(readFileSync(join(resolve(srcFolder), value.alterFile), "utf-8"))["alter"]
+            }
+            else if (value.alter) {
+                result[value.origin] = value.alter
             }
         }
         return result
+    }
+    public toTranslationProject(path: string) {
+        const mainFile = join(resolve(path), "main.json")
+        const result: DictKV = {}
+        const content: { [index: string]: DictAlterValue } = {}
+        /**
+         * 1. 遍历自己，拿到origin和alter
+         * 2. 将origin和alter格式化后写入文件
+         * 3. 校验TOKEN，不通过显示警告
+         * 4. 使用手写的遍历
+         */
+        for (let index = 0; index < Object.entries(this).length; index++) {
+            const [key, value] = Object.entries(this)[index] as [string, DictAlterValue];
+            const origin = new DialogueStr(value.origin)
+            const alter = new DialogueStr(value.alter ? value.alter : "")
+            const filePath = join(resolve(path), "src", key.toString() + ".xml")
+            content[key] = {
+                id: value.id,
+                origin: value.origin,
+                alter: value.alter,
+            }
+            if (origin.trait != alter.trait) {
+                // * 如果trait不匹配，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
+                StarLog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
+                buildTarget(filePath, convertToXMLStr(
+                    {
+                        origin: origin.strBeauty,
+                        alter: alter.strBeauty,
+                    }, 2, { trait: origin.trait }))
+                content[key]["alterFile"] = filePath
+            } else {
+                // 如果trait匹配，以{id:alter}格式添加至result
+                const strOriginLi = origin.strBeauty.split("\n")
+                const strAlterLi = alter.strBeauty.split("\n")
+                let str = ""
+                for (let index = 0; index < strOriginLi.length; index++) {
+                    str = str.concat(
+                        "\n//",
+                        strOriginLi[index],
+                        "\n",
+                        strAlterLi[index]
+                    )
+                }
+                result[key] = str
+            }
+        }
+        // 润色文件
+        const alterFilePath = join(resolve(path), "alter.xml")
+        buildTarget(alterFilePath, convertToXMLStr(result).replace(/\n\s*\n/gm, "\n"))
+        buildTarget(mainFile, JSON.stringify(content, undefined, 4))
     }
 }
 
 interface DictAlterValue {
     id: string
     origin: string
-    alter: string[]
+    alter?: string
+    alterFile?: string
 }
 
 export { extractModStr, mergeDict, DictAlter }

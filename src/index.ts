@@ -1,45 +1,26 @@
-// import { dump } from "js-yaml";
-// import { buildTarget } from "./utils/builder";
-// import { mergeDict } from "./utils/extrator";
-// import { parseJSON } from "./utils/parser";
-// const eng_file = "res/dict_eng.json"
-// const dict_eng = parseJSON(eng_file)
-// const da = mergeDict(dict_eng, dict_eng)
-// buildTarget("res/dictKV2.yaml", dump(da, { lineWidth: 100000000 }))
+import { mergeDict } from "./utils/extrator";
+import { parseJSON, parseXMLStr } from "./utils/parser";
+import { DialogueStr } from "./utils/str";
+const eng_file = "res/dict_eng.json"
+const chs_file = "res/dict_chs.json"
+const dict_eng = parseJSON(eng_file)
+const dict_chs = parseJSON(chs_file)
+const da = mergeDict(dict_eng, dict_chs)
+da.toTranslationProject("res/temp")
+// console.log(parseXMLStr(readFileSync("res/temp/src/12.xml", { encoding: "utf8" })))
+// ! 验证XML文件中带双引号"的文本能否正确替换
 
-// import { DialogueStr } from "./utils/str"
-
-// import { readFileSync, writeFileSync } from "fs";
-// import { DialogueStr } from "./utils/str";
-
-
-// // 测试YML直接格式化
-// const yml = readFileSync("res/dictKV2.yaml", { encoding: "utf8" })
-// writeFileSync("res/dictKV3.yaml", new DialogueStr(yml).strBeauty
-//     .replace(/^#/g, "    ")
-// )
-
-// const str = "{{hi{{nihao}}}}#$e#hi$1#$b#你好#$q   -302 -1#$r -2932 -2 xxx_event#我是@ hiya %adj hiya %noun hiya %place hiya %spouse hiya %name hiya %firstnameletter hiya %time hiya %band hiya %book hiya %rival hiya %pet hiya %farm hiya %favorite hiya %kid1 hiya %kid hiya "
-
-// const ds = new DialogueStr(str)
-
-// console.log(ds.trait)
-
-// const regex2 = /@|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2/gm
-
-// console.log(str.match(regex2))
-
-// 测试for循环
-
-// const li = [1, 2, 3, 4, 5]
-
-// function testFor() {
-//     for (let index = 0; index < li.length; index++) {
-//         const n = li[index];
-//         console.log(n)
-//         return
-//     }
-//     console.log("执行完了")
+// const origin = new DialogueStr("first line #$e#second line")
+// const alter = new DialogueStr("第一行 #$e#第二行")
+// const strOriginLi = origin.strBeauty.split("\n")
+// const strAlterLi = alter.strBeauty.split("\n")
+// let str = ""
+// for (let index = 0; index < strOriginLi.length; index++) {
+//     str = str.concat(
+//         "\n//\t",
+//         strOriginLi[index],
+//         "\n\t",
+//         strAlterLi[index]
+//     )
 // }
-
-// testFor()
+// console.log(str)
