@@ -7,7 +7,7 @@ enum LOG {
 }
 
 // curl -s https://gist.githubusercontent.com/HaleTom/89ffe32783f89f403bba96bd7bcd1263/raw/ | bash
-function StarLog(level: LOG, ...str: string[]) {
+function starlog(level: LOG, ...str: any[]) {
     let prefix = ""
     switch (level) {
         case LOG.INFO:
@@ -28,4 +28,4 @@ function StarLog(level: LOG, ...str: string[]) {
     console.log(prefix, ...str)
 }
 
-export { LOG, StarLog }
+export { LOG, starlog }

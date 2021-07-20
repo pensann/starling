@@ -1,5 +1,5 @@
-import { resolve, join, extname } from "path";
-import { StarLog, LOG } from "./log";
+import { resolve, join, extname, dirname, basename } from "path";
+import { starlog, LOG } from "./log";
 import { parseJSON } from "./parser";
 import {
     regexp_dialogue,
@@ -11,6 +11,7 @@ import {
     regexp_npc_dispositions,
     regexp_data_npc_gift_tastes
 } from "../libs/regex"
+import { buildTarget } from "./builder";
 class ChangeTraversor {
     public change: CommonChange
     public re: RegExp
@@ -195,7 +196,7 @@ class EditDataTraversor extends ChangeTraversor {
                 }
                 break;
             default:
-                // TODO Fields
+                // ? Fields SVE中Fields不包含文本
                 // 这个部分的Entries满足{Key:Value}模式
                 if (change.Entries) {
                     const target = change.Target
@@ -221,7 +222,7 @@ class LoadTraversor extends ChangeTraversor {
      */
     public traverse(strHandler?: (str: string, ...args: any[]) => string, ...args: any[]): ChangeAlter {
         const result: ChangeAlter = {
-            alter: this.change,
+            alter: this.change as Load,
             dict: {}
         }
         const change = this.change as Load
@@ -242,8 +243,10 @@ class LoadTraversor extends ChangeTraversor {
                     const target = change.Target
                     const entriesAlter = this.defaultEntriesTraversor(this.baseID, target, entries, strHandler, ...args)
                     Object.assign(result.dict, entriesAlter.dict)
-                    // TODO Load需要做IO操作，将输出好的Entries整理成文件，并修改FromFile入口
-                    // Object.assign(result.alter.Entries, entriesAlter.alter)
+                    const filePathR = join(dirname(change.FromFile), basename(change.FromFile, ".json") + "-alter.json")
+                    const filePath = join(resolve(this.modPath), filePathR)
+                    buildTarget(filePath, JSON.stringify(entriesAlter.alterEntries, undefined, 4))
+                    result.alter["FromFile"] = filePathR
                     break;
             }
         }
@@ -269,7 +272,7 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
         return matchList ? matchList.length : 0
     })()
     if (qtMarkNum % 2) {
-        StarLog(LOG.WARN, "文本包含未闭合引号，使用全字匹配模式...\n\x1B[38;5;65m${str}\x1B[0m")
+        starlog(LOG.WARN, "文本包含未闭合引号，使用全字匹配模式...\n\x1B[38;5;65m${str}\x1B[0m")
         result.strLi.push(str)
         if (strHandler) { result.alterStr = strHandler(str, ...args) }
     }
@@ -281,14 +284,5 @@ function event_str_traversor(str: string, strHandler?: (str: string, ...args: an
     })
     return result
 }
-
-/**
- * 翻译器，查找字典中传入字符串的翻译。  
- * * 若字典中未找到翻译，则返回`原字符串`
- */
-function str_translator(str: string, dict: { [index: string]: string }) {
-    return dict[str] ? dict[str] : str
-}
-
 
 export { EditDataTraversor, LoadTraversor }

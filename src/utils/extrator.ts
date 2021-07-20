@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
 import { buildTarget } from "./builder";
 import { DialogueStr } from "./str";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
-import { LOG, StarLog } from "./log";
+import { LOG, starlog } from "./log";
 import { parseJSON, parseXMLStr } from "./parser";
 
 function extractModStr(contentFile: string, re?: RegExp) {
@@ -59,10 +59,11 @@ function convertToXMLStr(entries: DictKV, space?: string | number, attr?: { [ind
 
 class DictAlter {
     [index: number]: DictAlterValue
-    public toDictKV(srcFolder: string) {
+    public toDictKV(srcFolder?: string) {
         const result: DictKV = {}
-        for (const [key, value] of Object.entries(this) as [string, DictAlterValue][]) {
-            if (value.alterFile) {
+        // TODO 这里替换成手写的遍历
+        for (const [_, value] of Object.entries(this) as [string, DictAlterValue][]) {
+            if (value.alterFile && srcFolder) {
                 // ? 如果有alterFile，根据srcFolder读取AlterFile
                 result[value.origin] = parseXMLStr(readFileSync(join(resolve(srcFolder), value.alterFile), "utf-8"))["alter"]
             }
@@ -89,12 +90,11 @@ class DictAlter {
             const filePath = join(resolve(path), "src", key.toString() + ".xml")
             content[key] = {
                 id: value.id,
-                origin: value.origin,
-                alter: value.alter,
+                origin: value.origin
             }
             if (origin.trait != alter.trait) {
                 // * 如果trait不匹配，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
-                StarLog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
+                starlog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
                 buildTarget(filePath, convertToXMLStr(
                     {
                         origin: origin.strBeauty,
@@ -120,7 +120,7 @@ class DictAlter {
         // 润色文件
         const alterFilePath = join(resolve(path), "alter.xml")
         buildTarget(alterFilePath, convertToXMLStr(result).replace(/\n\s*\n/gm, "\n"))
-        buildTarget(mainFile, JSON.stringify(content, undefined, 4))
+        buildTarget(mainFile, JSON.stringify(content, undefined, 2))
     }
 }
 
