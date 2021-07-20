@@ -1,12 +1,11 @@
 import { create } from "xmlbuilder2"
 import { dirname, join, resolve } from "path";
-import { readFileSync } from "fs";
 
 import { buildTarget } from "./builder";
 import { DialogueStr } from "./str";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
 import { LOG, starlog } from "./log";
-import { parseJSON, parseXMLStr } from "./parser";
+import { parseJSON, parseXML } from "./parser";
 
 function extractModStr(contentFile: string, re?: RegExp) {
     const result: DictKV = {}
@@ -59,13 +58,17 @@ function convertToXMLStr(entries: DictKV, space?: string | number, attr?: { [ind
 
 class DictAlter {
     [index: number]: DictAlterValue
+    constructor(dict?: DictAlter) {
+        Object.assign(this, dict)
+    }
     public toDictKV(srcFolder?: string) {
         const result: DictKV = {}
         // TODO 这里替换成手写的遍历
-        for (const [_, value] of Object.entries(this) as [string, DictAlterValue][]) {
+        for (let index = 0; index < Object.values(this).length; index++) {
+            const value = Object.values(this)[index];
             if (value.alterFile && srcFolder) {
                 // ? 如果有alterFile，根据srcFolder读取AlterFile
-                result[value.origin] = parseXMLStr(readFileSync(join(resolve(srcFolder), value.alterFile), "utf-8"))["alter"]
+                result[value.origin] = parseXML(join(resolve(srcFolder), value.alterFile), "utf-8")["alter"]
             }
             else if (value.alter) {
                 result[value.origin] = value.alter
@@ -87,20 +90,26 @@ class DictAlter {
             const [key, value] = Object.entries(this)[index] as [string, DictAlterValue];
             const origin = new DialogueStr(value.origin)
             const alter = new DialogueStr(value.alter ? value.alter : "")
+            // * 绝对路径
             const filePath = join(resolve(path), "src", key.toString() + ".xml")
+            const filePathRel = join("src", key.toString() + ".xml")
             content[key] = {
                 id: value.id,
                 origin: value.origin
             }
-            if (origin.trait != alter.trait) {
-                // * 如果trait不匹配，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
+            if (
+                origin.trait != alter.trait
+                || !alter.str
+            ) {
+                // * 如果trait不匹配，或者没有翻译，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
                 starlog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
                 buildTarget(filePath, convertToXMLStr(
                     {
                         origin: origin.strBeauty,
                         alter: alter.strBeauty,
                     }, 2, { trait: origin.trait }))
-                content[key]["alterFile"] = filePath
+                // content[key]["alterFile"] = filePath
+                content[key]["alterFile"] = filePathRel
             } else {
                 // 如果trait匹配，以{id:alter}格式添加至result
                 const strOriginLi = origin.strBeauty.split("\n")
@@ -124,6 +133,26 @@ class DictAlter {
     }
 }
 
+function loadTranslationProject(path: string): DictKV {
+    const content: DictAlter = parseJSON(join(resolve(path), "main.json"))
+    const alterXML = parseXML(join(resolve(path), "alter.xml"))
+    // starlog(LOG.DEBUG, alterXML)
+    for (let index = 0; index < Object.entries(content).length; index++) {
+        const [key, value] = Object.entries(content)[index] as [unknown, DictAlterValue]
+        // 首先从alterXML里面寻求润色文本（一般情况下没有）
+        content[key as number].alter = alterXML[key as number]
+        // 读取alterFile
+        if (value.alterFile) {
+            const alterFromXML = parseXML(join(resolve(path), value.alterFile))["alter"]
+            if (alterFromXML) {
+                content[key as number].alter = alterFromXML
+            }
+            content[key as number].alterFile = undefined
+        }
+    }
+    return new DictAlter(content).toDictKV(path)
+}
+
 interface DictAlterValue {
     id: string
     origin: string
@@ -131,4 +160,4 @@ interface DictAlterValue {
     alterFile?: string
 }
 
-export { extractModStr, mergeDict, DictAlter }
+export { extractModStr, mergeDict, DictAlter, loadTranslationProject }

@@ -32,10 +32,18 @@ function parseXMLStr(str: string) {
     parser.parseString(str, (err: string, res: any) => {
         if (err) throw err
         res.entries.entry.forEach((entry: any) => {
-            entries[entry.$.id] = entry._
+            entries[entry.$.id] = entry._ ? entry._
+                .replace(/\n/gm, "")
+                .replace(/^\s*|\s*$/gm, "") : entry._
         })
     })
     return entries
 }
 
-export { parseJSON, parseXMLStr }
+
+function parseXML(path: string, encoding: BufferEncoding = "utf-8") {
+    const xmlStr = stripComments(stripBOM(readFileSync(path, encoding)))
+        .replace(/\s\/\/.*\n/gm, "")
+    return parseXMLStr(xmlStr)
+}
+export { parseJSON, parseXML }

@@ -1,6 +1,7 @@
 // * mergeDict验证通过
 // import { mergeDict } from "./utils/extrator";
 // import { parseJSON } from "./utils/parser";
+// import { buildTarget } from "./utils/builder";
 
 // const eng_file = "res/dict_eng.json"
 // const chs_file = "res/dict_chs.json"
@@ -27,5 +28,10 @@
 // const da = mergeDict(dict_eng, dict_chs)
 // da.toTranslationProject("res/temp")
 
-// ! 验证XML文件中带双引号"的文本能否正确替换
+// TODO 验证不通过
+import { buildTarget } from "./utils/builder";
+import { loadTranslationProject } from "./utils/extrator";
 
+buildTarget("res/dict_translated.json", JSON.stringify(loadTranslationProject("res/temp"), undefined, 2))
+
+// ! 验证XML文件中带双引号"的文本能否正确替换
