@@ -64,7 +64,10 @@ function buildTranslationProject(path: string) {
     }
 }
 
-function translateMod(path: string, zip: boolean = false) {
+interface translateSettings {
+    zip?: boolean
+}
+function translateMod(path: string, settings: translateSettings) {
     const manifest: TransManifest = parseJSON(path)
     for (let index = 0; index < manifest.Mods2BTrans.length; index++) {
         const mod = manifest.Mods2BTrans[index]
@@ -120,7 +123,7 @@ function translateMod(path: string, zip: boolean = false) {
         "cd '" + srcFolder + "'"
         + " && zip -q -r -9 '" + target + "' '" + srcName + "' -x '*.DS_Store'"
         + " && mv '" + target + "' '" + targetFolder + "'"
-    if (zip) {
+    if (settings.zip) {
         exec(cmd)
         starlog(LOG.INFO, "正在制作压缩包...")
     }
