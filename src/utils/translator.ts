@@ -5,39 +5,40 @@ import { EditDataTraversor, LoadTraversor } from "./traversor";
 import { buildTarget } from "./builder";
 import { parseJSON } from "./parser";
 
-function translate(path: string, dict: DictKV) {
-    const finalPath = (() => {
-        if (lstatSync(path).isDirectory()) {
-            const backup = join(resolve(path), "content-backup.json")
-            const origin = join(resolve(path), "content.json")
+function getContentPath(path: string) {
+    if (lstatSync(path).isDirectory()) {
+        const backup = join(resolve(path), "content-backup.json")
+        const origin = join(resolve(path), "content.json")
+        if (existsSync(backup)) {
+            return backup
+        }
+        else if (existsSync(origin)) {
+            return origin
+        }
+    } else if (existsSync(path)) {
+        // 如果Path不是文件夹，判断文件名
+        if (basename(path) == "content-backup.json") {
+            // 如果是content-backup.json则直接赋值
+            return path
+        }
+        else if (basename(path) == "content.json") {
+            // 如果是content.json则查看同级文件夹是否有backup文件
+            const backup = join(resolve(dirname(path)), "content-backup.json")
             if (existsSync(backup)) {
                 return backup
             }
-            else if (existsSync(origin)) {
-                return origin
-            }
-        } else if (existsSync(path)) {
-            // 如果Path不是文件夹，判断文件名
-            if (basename(path) == "content-backup.json") {
-                // 如果是content-backup.json则直接赋值
+            else {
                 return path
             }
-            else if (basename(path) == "content.json") {
-                // 如果是content.json则查看同级文件夹是否有backup文件
-                const backup = join(resolve(dirname(path)), "content-backup.json")
-                if (existsSync(backup)) {
-                    return backup
-                }
-                else {
-                    return path
-                }
-            } else {
-                starlog(LOG.ERROR, "文件不存在")
-                return
-            }
+        } else {
+            starlog(LOG.ERROR, "文件不存在")
+            return
         }
-    })()
+    }
+}
 
+function translate(path: string, dict: DictKV) {
+    const finalPath = getContentPath(path)
     if (finalPath) {
         const content: ContentPack = parseJSON(finalPath)
         const changesAlter: ContentPack["Changes"] = []
@@ -69,4 +70,4 @@ function str_translator(str: string, dict: DictKV) {
     return dict[str] ? dict[str] : str
 }
 
-export { translate }
+export { translate, getContentPath }

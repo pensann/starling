@@ -3,6 +3,8 @@
 // import { parseJSON } from "./utils/parser";
 // import { buildTarget } from "./utils/builder";
 
+import { buildTranslationProject, translateAndZip } from "./tools"
+
 // const eng_file = "res/dict_eng.json"
 // const chs_file = "res/dict_chs.json"
 // const dict_eng = parseJSON(eng_file)
@@ -28,10 +30,19 @@
 // const da = mergeDict(dict_eng, dict_chs)
 // da.toTranslationProject("res/temp")
 
-// TODO 验证不通过
-import { buildTarget } from "./utils/builder";
-import { loadTranslationProject } from "./utils/extrator";
+// * 验证loadTranslationProject通过，可加载为Dict
+// import { buildTarget } from "./utils/builder";
+// import { loadTranslationProject } from "./utils/extrator";
 
-buildTarget("res/dict_translated.json", JSON.stringify(loadTranslationProject("res/temp"), undefined, 2))
+// buildTarget("res/dict_translated.json", JSON.stringify(loadTranslationProject("res/temp"), undefined, 2))
+
+
 
 // ! 验证XML文件中带双引号"的文本能否正确替换
+
+
+
+
+const path = "res/translator.json"
+// buildTranslationProject(path)
+translateAndZip(path)

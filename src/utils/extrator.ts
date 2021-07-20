@@ -6,6 +6,7 @@ import { DialogueStr } from "./str";
 import { EditDataTraversor, LoadTraversor } from "./traversor";
 import { LOG, starlog } from "./log";
 import { parseJSON, parseXML } from "./parser";
+import { regexp_events } from "../libs/regex";
 
 function extractModStr(contentFile: string, re?: RegExp) {
     const result: DictKV = {}
@@ -63,7 +64,6 @@ class DictAlter {
     }
     public toDictKV(srcFolder?: string) {
         const result: DictKV = {}
-        // TODO 这里替换成手写的遍历
         for (let index = 0; index < Object.values(this).length; index++) {
             const value = Object.values(this)[index];
             if (value.alterFile && srcFolder) {
@@ -85,15 +85,20 @@ class DictAlter {
          * 2. 将origin和alter格式化后写入文件
          * 3. 校验TOKEN，不通过显示警告
          * 4. 使用手写的遍历
+         * 5. 注意校验待翻译文本是否重复
          */
-        for (let index = 0; index < Object.entries(this).length; index++) {
-            const [key, value] = Object.entries(this)[index] as [string, DictAlterValue];
+        const duplicatedFile: DictKV = {}
+        const duplicatedEntry: DictKV = {}
+        let entryCount = 1
+        let fnameCount = 1
+        for (let index = 0; index < Object.values(this).length; index++) {
+            const value = Object.values(this)[index] as DictAlterValue
             const origin = new DialogueStr(value.origin)
             const alter = new DialogueStr(value.alter ? value.alter : "")
             // * 绝对路径
-            const filePath = join(resolve(path), "src", key.toString() + ".xml")
-            const filePathRel = join("src", key.toString() + ".xml")
-            content[key] = {
+            const filePath = join(resolve(path), "src", fnameCount.toString() + ".xml")
+            const filePathRel = join("src", fnameCount.toString() + ".xml")
+            content[entryCount] = {
                 id: value.id,
                 origin: value.origin
             }
@@ -103,15 +108,27 @@ class DictAlter {
             ) {
                 // * 如果trait不匹配，或者没有翻译，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
                 starlog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
-                buildTarget(filePath, convertToXMLStr(
-                    {
-                        origin: origin.strBeauty,
-                        alter: alter.strBeauty,
-                    }, 2, { trait: origin.trait }))
-                // content[key]["alterFile"] = filePath
-                content[key]["alterFile"] = filePathRel
-            } else {
-                // 如果trait匹配，以{id:alter}格式添加至result
+                if (duplicatedFile[origin.str]) {
+                    // 如果重复，则直接使用之前新建好的文件
+                    content[entryCount]["alterFile"] = duplicatedFile[origin.str]
+                } else {
+                    // 如果不重复，建立文件
+                    buildTarget(filePath, convertToXMLStr(
+                        {
+                            origin: origin.strBeauty,
+                            alter: alter.strBeauty,
+                        }, 2, { trait: origin.trait }))
+                    // content[key]["alterFile"] = filePath
+                    // 写入duplicatedFile字典
+                    duplicatedFile[origin.str] = filePathRel
+                    // 写入content
+                    content[entryCount]["alterFile"] = filePathRel
+                    // 计数++
+                    entryCount++
+                    fnameCount++
+                }
+            } else if (!duplicatedEntry[origin.str]) {
+                // 如果trait匹配,检查是否重复,以{id:alter}格式添加至result
                 const strOriginLi = origin.strBeauty.split("\n")
                 const strAlterLi = alter.strBeauty.split("\n")
                 let str = ""
@@ -123,7 +140,8 @@ class DictAlter {
                         strAlterLi[index]
                     )
                 }
-                result[key] = str
+                result[entryCount] = str
+                entryCount++
             }
         }
         // 润色文件
@@ -139,13 +157,23 @@ function loadTranslationProject(path: string): DictKV {
     // starlog(LOG.DEBUG, alterXML)
     for (let index = 0; index < Object.entries(content).length; index++) {
         const [key, value] = Object.entries(content)[index] as [unknown, DictAlterValue]
-        // 首先从alterXML里面寻求润色文本（一般情况下没有）
+        // 首先从alterXML里面寻求润色文本
         content[key as number].alter = alterXML[key as number]
         // 读取alterFile
         if (value.alterFile) {
             const alterFromXML = parseXML(join(resolve(path), value.alterFile))["alter"]
             if (alterFromXML) {
-                content[key as number].alter = alterFromXML
+                if (alterFromXML.includes("我们现在必须保护好你的")) {
+                    starlog(LOG.DEBUG, join(resolve(path), value.alterFile))
+                    starlog(LOG.DEBUG, alterFromXML)
+                }
+                if (regexp_events.test(value.id)) {
+                    // * Events类型双引号替换为单引号
+                    content[key as number].alter = alterFromXML
+                        .replace(/"/gm, "'")
+                } else {
+                    content[key as number].alter = alterFromXML
+                }
             }
             content[key as number].alterFile = undefined
         }

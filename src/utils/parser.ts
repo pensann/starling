@@ -44,6 +44,7 @@ function parseXMLStr(str: string) {
 function parseXML(path: string, encoding: BufferEncoding = "utf-8") {
     const xmlStr = stripComments(stripBOM(readFileSync(path, encoding)))
         .replace(/\s\/\/.*\n/gm, "")
+        .replace(/^\s+/gm, "")
     return parseXMLStr(xmlStr)
 }
 export { parseJSON, parseXML }
