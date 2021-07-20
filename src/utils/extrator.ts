@@ -107,11 +107,11 @@ class DictAlter {
                 || !alter.str
             ) {
                 // * 如果trait不匹配，或者没有翻译，以{origin:xxx,alter:xxx}&attr = {trait:xxx}格式写入文件
-                starlog(LOG.WARN, "特征不匹配:\n", origin.str + "\n" + alter.str)
                 if (duplicatedFile[origin.str]) {
                     // 如果重复，则直接使用之前新建好的文件
                     content[entryCount]["alterFile"] = duplicatedFile[origin.str]
                 } else {
+                    starlog(LOG.WARN, "特征不匹配:\n" + origin.str + "\n" + alter.str)
                     // 如果不重复，建立文件
                     buildTarget(filePath, convertToXMLStr(
                         {
@@ -154,7 +154,6 @@ class DictAlter {
 function loadTranslationProject(path: string): DictKV {
     const content: DictAlter = parseJSON(join(resolve(path), "main.json"))
     const alterXML = parseXML(join(resolve(path), "alter.xml"))
-    // starlog(LOG.DEBUG, alterXML)
     for (let index = 0; index < Object.entries(content).length; index++) {
         const [key, value] = Object.entries(content)[index] as [unknown, DictAlterValue]
         // 首先从alterXML里面寻求润色文本
@@ -163,16 +162,21 @@ function loadTranslationProject(path: string): DictKV {
         if (value.alterFile) {
             const alterFromXML = parseXML(join(resolve(path), value.alterFile))["alter"]
             if (alterFromXML) {
-                if (alterFromXML.includes("我们现在必须保护好你的")) {
-                    starlog(LOG.DEBUG, join(resolve(path), value.alterFile))
-                    starlog(LOG.DEBUG, alterFromXML)
-                }
+                // !Events类型双引号替换为单引号
                 if (regexp_events.test(value.id)) {
-                    // * Events类型双引号替换为单引号
                     content[key as number].alter = alterFromXML
                         .replace(/"/gm, "'")
                 } else {
                     content[key as number].alter = alterFromXML
+                }
+                // TODO 检查文件中的翻译特征是否满足
+                const alterStr = content[key as number].alter
+                if (alterStr) {
+                    const origin = new DialogueStr(content[key as number].origin)
+                    const alter = new DialogueStr(alterStr)
+                    if (alter.str.length == 0 || origin.trait != alter.trait) {
+                        starlog(LOG.WARN, "翻译不正确:" + value.alterFile)
+                    }
                 }
             }
             content[key as number].alterFile = undefined

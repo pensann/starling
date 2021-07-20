@@ -3,7 +3,7 @@
 // import { parseJSON } from "./utils/parser";
 // import { buildTarget } from "./utils/builder";
 
-import { buildTranslationProject, translateAndZip } from "./tools"
+import { buildTranslationProject, translateMod } from "./tools"
 
 // const eng_file = "res/dict_eng.json"
 // const chs_file = "res/dict_chs.json"
@@ -37,12 +37,6 @@ import { buildTranslationProject, translateAndZip } from "./tools"
 // buildTarget("res/dict_translated.json", JSON.stringify(loadTranslationProject("res/temp"), undefined, 2))
 
 
-
-// ! 验证XML文件中带双引号"的文本能否正确替换
-
-
-
-
 const path = "res/translator.json"
 // buildTranslationProject(path)
-translateAndZip(path)
+translateMod(path)

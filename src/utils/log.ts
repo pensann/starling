@@ -25,7 +25,10 @@ function starlog(level: LOG, ...str: any[]) {
         default:
             break;
     }
-    console.log(prefix, ...str)
+    // 日志级别
+    if (level < 4) {
+        console.log(prefix, ...str)
+    }
 }
 
 export { LOG, starlog }

@@ -18,7 +18,7 @@ function buildTarget(target: string, content: string) {
     const dir = dirname(target)
     if (!existsSync(dir)) mkdirSyncP(dir)
     if (existsSync(target)) {
-        starlog(LOG.WARN, "目标存在，覆盖文件: ", resolve(target))
+        starlog(LOG.DEBUG, "目标存在，覆盖文件: ", resolve(target))
     }
     writeFileSync(target, content)
 }
