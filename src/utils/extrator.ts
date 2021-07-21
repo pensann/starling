@@ -161,7 +161,9 @@ function loadTranslationProject(path: string): DictKV {
         // 读取alterFile
         if (value.alterFile) {
             const alterFromXML = parseXML(join(resolve(path), value.alterFile))["alter"]
-            if (alterFromXML) {
+            if (!alterFromXML) {
+                starlog(LOG.ERROR, "文件未翻译:" + value.alterFile)
+            } else {
                 // !Events类型双引号替换为单引号
                 if (regexp_events.test(value.id)) {
                     content[key as number].alter = alterFromXML
@@ -174,8 +176,8 @@ function loadTranslationProject(path: string): DictKV {
                 if (alterStr) {
                     const origin = new DialogueStr(content[key as number].origin)
                     const alter = new DialogueStr(alterStr)
-                    if (alter.str.length == 0 || origin.trait != alter.trait) {
-                        starlog(LOG.WARN, "翻译不正确:" + value.alterFile)
+                    if (origin.trait != alter.trait) {
+                        starlog(LOG.ERROR, "翻译不正确:" + value.alterFile)
                     }
                 }
             }

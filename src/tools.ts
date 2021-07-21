@@ -45,7 +45,8 @@ function buildTranslationProject(path: string) {
                 // 如果当前模组有翻译,解压Alter
                 if (basename(contentPath) == "content-backup.json") {
                     const path = join(dirname(contentPath), "content.json")
-                    Object.assign(dictAlter, extractModStr(path))
+                    // !这里有Hardcode
+                    Object.assign(dictAlter, extractModStr(path, /[\u4e00-\u9fa5]/gm))
                 }
                 // 如果有FromMod，解压Alter
                 // !这里有Hardcode
@@ -67,7 +68,7 @@ function buildTranslationProject(path: string) {
 interface translateSettings {
     zip?: boolean
 }
-function translateMod(path: string, settings: translateSettings) {
+function translateMod(path: string, settings?: translateSettings) {
     const manifest: TransManifest = parseJSON(path)
     for (let index = 0; index < manifest.Mods2BTrans.length; index++) {
         const mod = manifest.Mods2BTrans[index]
@@ -123,7 +124,7 @@ function translateMod(path: string, settings: translateSettings) {
         "cd '" + srcFolder + "'"
         + " && zip -q -r -9 '" + target + "' '" + srcName + "' -x '*.DS_Store'"
         + " && mv '" + target + "' '" + targetFolder + "'"
-    if (settings.zip) {
+    if (settings && settings.zip) {
         exec(cmd)
         starlog(LOG.INFO, "正在制作压缩包...")
     }
