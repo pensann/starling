@@ -50,6 +50,11 @@ function translate(path: string, dict: DictKV) {
                 const traversor = new LoadTraversor(change, dirname(finalPath))
                 changesAlter.push(traversor.traverse(str_translator, dict).alter)
             }
+            // ! bug, 这里需要处理其它字段
+            // TODO 测试
+            else {
+                changesAlter.push(change)
+            }
         })
         const oldFile = join(dirname(finalPath), "content.json")
         const newFile = join(dirname(finalPath), "content-backup.json")
