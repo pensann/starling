@@ -16,15 +16,16 @@ class ChangeTraversor {
     public change: CommonChange
     public re: RegExp
     constructor(change: CommonFields, re?: RegExp) {
-        this.re = re ? re : /./gm
+        this.re = re ? re : /./m
         this.change = change
     }
 
     // * BaseID
     protected get baseID(): string {
-        return this.change.Action + this.change.Target + "[When]" + (() => {
+        return this.change.Action + this.change.Target + (() => {
             let str = ""
             if (this.change.When) {
+                str += "[When]"
                 for (const [key, value] of Object.entries(this.change.When)) {
                     if (key.toLowerCase() != "language") {
                         str += key + value
@@ -56,8 +57,13 @@ class ChangeTraversor {
                 || regexp_data_mail.test(target)
                 || regexp_strings_from_csfiles.test(target)
                 || regexp_data_strings_from_maps.test(target)
+                || regexp_festivals.test(target) //festivals默认为Dialogue模式但含有对话模式
             ) {
-                if (value && this.re.test(value)) {
+                if (value
+                    && this.re.test(value)
+                    && !/speak\s*?.*?\s*?\\"/gm.exec(value)
+                    && key != "set-up") {
+                    // 使用正则提取非对话
                     // 将字符串提取至字典
                     result.dict[baseID + key] = value
                     // 处理字符串
@@ -71,7 +77,10 @@ class ChangeTraversor {
                 regexp_events.test(target)
                 || regexp_festivals.test(target)
             ) {
-                if (value && this.re.test(value)) {
+                if (value
+                    && this.re.test(value)
+                    && /speak\s*?.*?\s*?\\"/gm.exec(value)
+                    && key != "set-up") {
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0
                     // JS对于已知长度的List手写遍历的性能比迭代器好
@@ -243,10 +252,12 @@ class LoadTraversor extends ChangeTraversor {
                     const target = change.Target
                     const entriesAlter = this.defaultEntriesTraversor(this.baseID, target, entries, strHandler, ...args)
                     Object.assign(result.dict, entriesAlter.dict)
-                    const filePathR = join(dirname(change.FromFile), basename(change.FromFile, ".json") + "-alter.json")
-                    const filePath = join(resolve(this.modPath), filePathR)
-                    buildTarget(filePath, JSON.stringify(entriesAlter.alterEntries, undefined, 4))
-                    result.alter["FromFile"] = filePathR
+                    if (strHandler) {
+                        const filePathR = join(dirname(change.FromFile), basename(change.FromFile, ".json") + "-alter.json")
+                        const filePath = join(resolve(this.modPath), filePathR)
+                        buildTarget(filePath, JSON.stringify(entriesAlter.alterEntries, undefined, 4))
+                        result.alter["FromFile"] = filePathR
+                    }
                     break;
             }
         }

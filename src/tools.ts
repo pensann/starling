@@ -46,17 +46,16 @@ function buildTranslationProject(path: string) {
                 if (basename(contentPath) == "content-backup.json") {
                     const path = join(dirname(contentPath), "content.json")
                     // !这里有Hardcode
-                    Object.assign(dictAlter, extractModStr(path, /[\u4e00-\u9fa5]/gm))
+                    Object.assign(dictAlter, extractModStr(path, /[^\x00-\xff]/m))
                 }
                 // 如果有FromMod，解压Alter
                 // !这里有Hardcode
                 if (mod.FromMod) {
-                    const content = extractModStr(join(mod.FromMod, "content.json"), /[\u4e00-\u9fa5]/gm)
+                    const content = extractModStr(join(mod.FromMod, "content.json"), /[^\x00-\xff]/m)
                     if (content) {
                         Object.assign(dictAlter, content)
                     }
                 }
-
             }
             // 合并字典,制作翻译工程
             mergeDict(dictOrigin, dictAlter).toTranslationProject(mod.TranslationProject)
