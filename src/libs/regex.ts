@@ -30,5 +30,6 @@ export {
     regexp_strings_from_csfiles,
     regexp_data_strings_from_maps,
     regexp_npc_dispositions,
-    regexp_data_npc_gift_tastes
+    regexp_data_npc_gift_tastes,
+    regexp_strings_schedule
 }

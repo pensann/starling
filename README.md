@@ -4,4 +4,4 @@
 
 ## 架构
 
-![alt 架构图](/images/Starling.png)
+![alt 架构图](doc/images/Starling.png)

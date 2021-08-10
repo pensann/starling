@@ -9,7 +9,8 @@ import {
     regexp_events,
     regexp_festivals,
     regexp_npc_dispositions,
-    regexp_data_npc_gift_tastes
+    regexp_data_npc_gift_tastes,
+    regexp_strings_schedule
 } from "../libs/regex"
 import { buildTarget } from "./builder";
 class ChangeTraversor {
@@ -57,11 +58,12 @@ class ChangeTraversor {
                 || regexp_data_mail.test(target)
                 || regexp_strings_from_csfiles.test(target)
                 || regexp_data_strings_from_maps.test(target)
+                || regexp_strings_schedule.test(target)
                 || regexp_festivals.test(target) //festivals默认为Dialogue模式但含有对话模式
             ) {
                 if (value
                     && this.re.test(value)
-                    && !/speak\s*?.*?\s*?\\"/gm.exec(value)
+                    && !/speak\s*?.*?\s*?\"/m.test(value)
                     && key != "set-up") {
                     // 使用正则提取非对话
                     // 将字符串提取至字典
@@ -79,7 +81,7 @@ class ChangeTraversor {
             ) {
                 if (value
                     && this.re.test(value)
-                    && /speak\s*?.*?\s*?\\"/gm.exec(value)
+                    && /speak\s*?.*?\s*?\"/m.test(value)
                     && key != "set-up") {
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0

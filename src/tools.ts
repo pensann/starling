@@ -35,7 +35,6 @@ function buildTranslationProject(path: string) {
     for (let index = 0; index < manifest.Mods2BTrans.length; index++) {
         const mod = manifest.Mods2BTrans[index]
         if (mod.Type == "ContentPack") {
-            starlog(LOG.DEBUG, mod)
             const dictOrigin = {}
             const dictAlter = {}
             const contentPath = getContentPath(mod.Path)
