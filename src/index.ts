@@ -2,7 +2,7 @@ import { buildTranslationProject, translateMod } from "./tools"
 import { buildTarget } from "./utils/builder"
 import { extractModStr, mergeDict } from "./utils/extrator"
 
-const path = "res/translator.json"
+const path = "res/SVE/sve.json"
 buildTranslationProject(path)
 // translateMod(path, { zip: false })
 // const dict = mergeDict(

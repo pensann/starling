@@ -41,12 +41,6 @@ function buildTranslationProject(path: string) {
             if (contentPath) {
                 // 解压原模组
                 Object.assign(dictOrigin, extractModStr(contentPath))
-                // 如果当前模组有翻译,解压Alter
-                if (basename(contentPath) == "content-backup.json") {
-                    const path = join(dirname(contentPath), "content.json")
-                    // !这里有Hardcode
-                    Object.assign(dictAlter, extractModStr(path, /[^\x00-\xff]/m))
-                }
                 // 如果有FromMod，解压Alter
                 // !这里有Hardcode
                 if (mod.FromMod) {
@@ -54,6 +48,12 @@ function buildTranslationProject(path: string) {
                     if (content) {
                         Object.assign(dictAlter, content)
                     }
+                }
+                // 如果当前模组有翻译,解压Alter
+                if (basename(contentPath) == "content-backup.json") {
+                    const path = join(dirname(contentPath), "content.json")
+                    // !这里有Hardcode
+                    Object.assign(dictAlter, extractModStr(path, /[^\x00-\xff]/m))
                 }
             }
             // 合并字典,制作翻译工程
