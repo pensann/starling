@@ -63,7 +63,7 @@ class ChangeTraversor {
             ) {
                 if (value
                     && this.re.test(value)
-                    && !/speak\s*?.*?\s*?\"/m.test(value)
+                    && !/\"/m.test(value)
                     && key != "set-up") {
                     // 使用正则提取非对话
                     // 将字符串提取至字典
@@ -81,7 +81,7 @@ class ChangeTraversor {
             ) {
                 if (value
                     && this.re.test(value)
-                    && /speak\s*?.*?\s*?\"/m.test(value)
+                    && /\"/m.test(value)
                     && key != "set-up") {
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0

@@ -171,7 +171,7 @@ function loadTranslationProject(path: string): DictKV {
                 } else {
                     content[key as number].alter = alterFromXML
                 }
-                // TODO 检查文件中的翻译特征是否满足
+                // 检查文件中的翻译特征是否满足
                 const alterStr = content[key as number].alter
                 if (alterStr) {
                     const origin = new DialogueStr(content[key as number].origin)
