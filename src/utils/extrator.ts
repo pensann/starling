@@ -68,10 +68,10 @@ class DictAlter {
             const value = Object.values(this)[index];
             if (value.alterFile && srcFolder) {
                 // ? 如果有alterFile，根据srcFolder读取AlterFile
-                result[value.origin] = parseXML(join(resolve(srcFolder), value.alterFile), "utf-8")["alter"]
+                result[value.origin] = parseXML(join(resolve(srcFolder), value.alterFile), "utf-8")["alter"].replace(/\r/g,"")
             }
             else if (value.alter) {
-                result[value.origin] = value.alter
+                result[value.origin] = value.alter.replace(/\r/g,"")
             }
         }
         return result

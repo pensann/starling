@@ -3,14 +3,35 @@ import { starlog, LOG } from "./log";
 import { parseJSON } from "./parser";
 import {
     regexp_dialogue,
-    regexp_data_mail,
-    regexp_data_strings_from_maps,
+    regexp_engagement_dialogue,
     regexp_strings_from_csfiles,
     regexp_events,
     regexp_festivals,
     regexp_npc_dispositions,
-    regexp_data_npc_gift_tastes,
-    regexp_strings_schedule
+    regexp_npcmaplocations,
+    regexp_mail,
+    regexp_strings_from_maps,
+    regexp_strings_schedules,
+    regexp_npc_gift_tastes,
+    regexp_schedules,
+    regexp_animation_descriptions,
+    regexp_fish,
+    regexp_antisocial_npcs,
+    regexp_custom_npc_exclusions,
+    regexp_special_order_strings,
+    regexp_strings_ui,
+    regexp_data_locations,
+    regexp_strings_locations,
+    regexp_extra_dialogue,
+    regexp_custom_wedding_guest_positions,
+    regexp_big_craftables_information,
+    regexp_object_context_tags,
+    regexp_speech_bubbles,
+    regexp_special_orders,
+    regexp_strings_events,
+    regexp_chair_tiles,
+    regexp_strings_characters,
+    regexp_objectinformation
 } from "../libs/regex"
 import { buildTarget } from "./builder";
 class ChangeTraversor {
@@ -55,15 +76,23 @@ class ChangeTraversor {
             // 匹配dialogue
             if (
                 regexp_dialogue.test(target)
-                || regexp_data_mail.test(target)
-                || regexp_strings_from_csfiles.test(target)
-                || regexp_data_strings_from_maps.test(target)
-                || regexp_strings_schedule.test(target)
+                || regexp_engagement_dialogue.test(target)
+                || regexp_extra_dialogue.test(target)
                 || regexp_festivals.test(target) //festivals默认为Dialogue模式但含有对话模式
+                || regexp_mail.test(target)
+                || regexp_special_order_strings.test(target)
+                || regexp_speech_bubbles.test(target)
+                || regexp_strings_characters.test(target)
+                || regexp_strings_from_csfiles.test(target)
+                || regexp_strings_from_maps.test(target)
+                || regexp_strings_locations.test(target)
+                || regexp_strings_schedules.test(target)
+                || regexp_strings_ui.test(target)
+                || regexp_strings_events.test(target)
             ) {
                 if (value
                     && this.re.test(value)
-                    && !/\"/m.test(value)
+                    && !/\//m.test(value)
                     && key != "set-up") {
                     // 使用正则提取非对话
                     // 将字符串提取至字典
@@ -81,7 +110,7 @@ class ChangeTraversor {
             ) {
                 if (value
                     && this.re.test(value)
-                    && /\"/m.test(value)
+                    && /\//m.test(value)
                     && key != "set-up") {
                     const eventAlter = event_str_traversor(value, strHandler, ...args)
                     let n = 0
@@ -114,7 +143,7 @@ class ChangeTraversor {
                 }
             }
             // 匹配GiftTastes
-            else if (regexp_data_npc_gift_tastes.test(target)) {
+            else if (regexp_npc_gift_tastes.test(target)) {
                 if (value && this.re.test(value)) {
                     const strLi = value.split("/")
                     if (strLi.length) {
@@ -136,6 +165,27 @@ class ChangeTraversor {
                         result.alterEntries[key] = strLi.join("/")
                     }
                 }
+            }
+            else if (
+                regexp_big_craftables_information.test(target) // TODO 可能需要处理
+                || regexp_animation_descriptions.test(target)
+                || regexp_antisocial_npcs.test(target)
+                || regexp_chair_tiles.test(target)
+                || regexp_custom_npc_exclusions.test(target)
+                || regexp_custom_wedding_guest_positions.test(target)
+                || regexp_data_locations.test(target)
+                || regexp_fish.test(target)
+                || regexp_npcmaplocations.test(target)
+                || regexp_object_context_tags.test(target)
+                || regexp_objectinformation.test(target)
+                || regexp_schedules.test(target)
+                || regexp_special_orders.test(target)
+            ) {
+                // 不需要处理
+            }
+            else {
+                starlog(LOG.WARN, `存在未知target: ${target}`)
+                throw new Error(`存在未知target: ${target}`);
             }
             // TODO 匹配其它Target
         }
