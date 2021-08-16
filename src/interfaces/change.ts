@@ -17,7 +17,7 @@ interface CommonFields extends BaseChange {
     When?: { [index: string]: string },
     LogName?: string,
     Enabled?: boolean,
-    Update?: "OnDayStart" | "OnLocationChange" | "OnTimeChange" | string
+    Update?: string
 }
 
 interface Load extends CommonFields {
@@ -27,8 +27,8 @@ interface Load extends CommonFields {
 
 interface EditData extends CommonFields {
     Action: "EditData",
-    Fields?: string, // TODO!
-    Entries?: { [index: string]: string | null | EntriesMoviesModel | EntriesListAssets },
+    Fields?: any,
+    Entries?: Entries,
     MoveEntries?: { [index: string]: string },
     TextOperations?: TextOperations[]
 }
@@ -69,14 +69,9 @@ interface Coordinate {
     Height: number,
 }
 
-interface EntriesMoviesModel {
-    [index: string]: any // TODO
+interface Entries {
+    [index: string]: string | null | MoviesReactionEntries | { [index: string]: any } // EntriesMoviesModel | EntriesListAssets
 }
-
-interface EntriesListAssets {
-    [index: string]: any // TODO
-}
-
 
 interface MoviesReactionEntries {
     [index: string]: {

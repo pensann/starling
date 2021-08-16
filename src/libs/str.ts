@@ -1,7 +1,12 @@
 class DialogueStr {
     public str: string
     constructor(str: string) {
-        this.str = str
+        if (str) {
+            this.str = str
+        }
+        else {
+            this.str = ""
+        }
     }
     public get strBeauty() {
         return this.str
