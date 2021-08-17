@@ -1,0 +1,87 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Characters/Dialogue/MarriageDialogueSophia",
+      "When": { "Date": "Summer 1" },
+      "Entries": {
+        "funReturn_Sophia": "Dinner is served! [727 231 207 199]$1#$e#Um! Did you have a nice day?$9",
+        "funLeave_Sophia": "Hey, you! It's the first and busiest day of the season! Good luck today!$9#$e#I'll make dinner tonight. Don't worry.$1"
+      }
+    },
+    {
+      //Lance event 1 - 'The Forge'
+      "Action": "EditData",
+      "Target": "data/events/caldera",
+      "Entries": {
+        "6951319": "continue/-500 -500/farmer 22 37 0 Lance -100 -100 2/skippable/pause 1250/showFrame Lance 39 true/viewport 22 32 true/viewport move 0 -1 4000 true/move farmer 0 -8 0/pause 650/faceDirection farmer 1/pause 1250/faceDirection farmer 0/faceDirection farmer 3/pause 1100/faceDirection farmer 0/pause 600/move farmer 0 -3 0 true/viewport move 0 -1 3000 true/pause 1500/warp Lance 22 22/pause 100/showFrame Lance 38 true/pause 100/showFrame Lance 37 true/pause 100/emote farmer 16 true/showFrame Lance 36 true/pause 100/showFrame Lance 35 true/pause 100/showFrame Lance 34 true/pause 100/showFrame Lance 33 true/pause 100/showFrame Lance 32 true/pause 100/showFrame Lance 31 true/pause 100/showFrame Lance 30 true/pause 100/showFrame Lance 29 true/pause 100/showFrame Lance 28 true/pause 100/showFrame Lance 27 true/pause 100/showFrame Lance 26 true/pause 100/showFrame Lance 25 true/pause 100/showFrame Lance 24 true/pause 100/showFrame Lance 23 true/pause 100/showFrame Lance 22 true/pause 100/showFrame Lance 21 true/pause 100/showFrame Lance 20 true/pause 650/speak Lance \"*chuckle* Few adventurers have scaled Mount Kohldur, once a great dwarf kingdom.$0#$b#Your achievement is a testament to your ambition and perseverance...$5\"/pause 1000/speak Lance \"Behind me is a lava-fed furnace capable of enchanting weapons and tools.$6#$b#It can even combine the divine properties of magical rings.$0#$b#A suiting reward for someone of your stature...$5\"/pause 1000/move Lance 0 2 2/pause 300/speak Lance \"I trust you'll make good use out of this ancient dwarvish relic, @.$0#$b#The First Slash sends their regards...$1\"/pause 500/showFrame Lance 21 true/pause 100/showFrame Lance 22 true/pause 100/showFrame Lance 23 true/pause 100/showFrame Lance 24 true/pause 100/showFrame Lance 25 true/pause 100/showFrame Lance 26 true/pause 100/showFrame Lance 27 true/pause 100/showFrame Lance 28 true/pause 100/showFrame Lance 29 true/pause 100/showFrame Lance 30 true/pause 100/showFrame Lance 31 true/pause 100/showFrame Lance 32 true/pause 100/showFrame Lance 33 true/pause 100/showFrame Lance 34 true/pause 100/showFrame Lance 35 true/pause 100/showFrame Lance 36 true/pause 100/showFrame Lance 37 true/pause 100/showFrame Lance 38 true/pause 100/showFrame Lance 39 true/pause 100/warp Lance -100 -100/pause 200/globalFade/viewport -1000 -1000/pause 50/end position 22 25"
+      }
+    },
+    {
+      //Enchanted Grove - part 1 (no grandpas farm) - player is not married to the wizard
+      "Action": "EditData",
+      "Target": "data/events/farm",
+      "When": {
+        "Spouse |contains=Wizard": false,
+        "HasFlag": "galaxySword",
+        "HasSeenEvent |contains=7502582": true,
+        "HasSeenEvent |contains=8050109": true,
+        "HasSeenEvent |contains=6951319": true
+      }, //player has galaxy sword, cleared the railroad boulder, saw Alesia's event, beat the volcano dungeon
+      "Entries": {
+        "908070/t 600 900": "continue/95 49/farmer 21 20 1 Wizard 20 20 0/skippable/pause 1000/speak Wizard \"Good morning, @. I bring important news from the Ferngill Republic Ministry of Magic.$0#$b#It would appear a high-ranking council member has expressed interest in developing your arcane potential, which isn't a common occurrence...$0\"/pause 500/emote farmer 8 true/pause 800/speak Wizard \"My colleagues have tasked me with teaching you warp magic. Meet me at my tower at your earliest convenience.$0\"/pause 850/faceDirection Wizard 1 true/pause 225/faceDirection Wizard 2 true/pause 650/showFrame Wizard 16 true/pause 400/shake Wizard 500/pause 500/screenFlash 1/playSound wand/warp Wizard -50 -50/pause 1000/end"
+      }
+    },
+    {
+      //HARDER MONSTER DATA
+      "Action": "EditData",
+      "Target": "Data/Monsters",
+      "Fields": {
+        "Green Slime": { "0": 30, "1": 12 },
+        "Dust Spirit": { "0": 25, "1": 8 },
+        "Bat": { "0": 18, "1": 13 },
+        "Frost Bat": { "0": 36, "1": 18 },
+        "Lava Bat": { "0": 80, "1": 25 },
+        "Iridium Bat": { "0": 300, "1": 40 },
+        "Stone Golem": { "0": 50, "1": 20 },
+        "Wilderness Golem": { "0": 40, "1": 20 },
+        "Grub": { "0": 20, "1": 8 },
+        "Fly": { "0": 22, "1": 13 },
+        "Frost Jelly": { "0": 80, "1": 15 },
+        "Sludge": { "0": 180, "1": 30 },
+        "Shadow Guy": { "0": 185, "1": 50 },
+        "Ghost": { "0": 96, "1": 40 },
+        "Carbon Ghost": { "0": 190, "1": 60 },
+        "Rock Crab": { "0": 30, "1": 13 },
+        "Lava Crab": { "0": 120, "1": 30 },
+        "Iridium Crab": { "0": 260, "1": 40 },
+        "Squid Kid": { "0": 1, "1": 50 },
+        "Skeleton Warrior": { "0": 300, "1": 25 },
+        "Shadow Brute": { "0": 220, "1": 50 },
+        "Shadow Shaman": { "0": 100, "1": 40 },
+        "Skeleton": { "0": 140, "1": 25 },
+        "Skeleton Mage": { "0": 60, "1": 20 },
+        "Metal Head": { "0": 150, "1": 30 },
+        "Spiker": { "0": 1, "1": 50 },
+        "Bug": { "0": 1, "1": 15 },
+        "Mummy": { "0": 350, "1": 60 },
+        "Big Slime": { "0": 150, "1": 35 },
+        "Serpent": { "0": 150, "1": 30 },
+        "Pepper Rex": { "0": 550, "1": 65 },
+        "Tiger Slime": { "0": 350, "1": 40 },
+        "Lava Lurk": { "0": 220, "1": 35 },
+        "Hot Head": { "0": 250, "1": 30 },
+        "Magma Sprite": { "0": 220, "1": 20 },
+        "Magma Sparker": { "0": 310, "1": 25 },
+        "False Magma Cap": { "0": 290, "1": 25 },
+        "Dwarvish Sentry": { "0": 300, "1": 35 },
+        "Putrid Ghost": { "0": 500, "1": 55 },
+        "Shadow Sniper": { "0": 300, "1": 38 },
+        "Spider": { "0": 150, "1": 25 },
+        "Royal Serpent": { "0": 600, "1": 45 },
+        "Blue Squid": { "0": 80, "1": 30 }
+      },
+      "When": { "StrongerMonsters": true }
+    }
+  ]
+}

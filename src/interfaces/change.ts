@@ -70,23 +70,21 @@ interface Coordinate {
 }
 
 interface Entries {
-    [index: string]: string | null | MoviesReactionEntries | { [index: string]: any } // EntriesMoviesModel | EntriesListAssets
+    [index: string]: string | null | MoviesReactionValue // EntriesMoviesModel | EntriesListAssets
 }
 
-interface MoviesReactionEntries {
-    [index: string]: {
-        NPCName: string,
-        Reactions: {
-            ID: string,
-            Tag: string,
-            Response: string
-            Whitelist: any[],
-            SpecialResponses: null | {
-                [index: string]: {
-                    Text?: string
-                    [index: string]: string | undefined
-                }
-            },
-        }[]
-    }
+interface MoviesReactionValue {
+    NPCName: string,
+    Reactions: {
+        ID: string,
+        Tag: string,
+        Response: string
+        Whitelist: any[],
+        SpecialResponses: null | {
+            [index: string]: {
+                Text?: string
+                [index: string]: string | undefined | null
+            }
+        },
+    }[]
 }
