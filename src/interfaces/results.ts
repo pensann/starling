@@ -1,6 +1,6 @@
 /** 最基础的字符串K-V 字典 */
 interface DictKV {
-    [index: string]: string
+    [i: string]: string
 }
 
 /** 包含修改后的Change和包含的字符串字典 */

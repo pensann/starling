@@ -33,7 +33,7 @@ class DialogueStr {
         "$u": "$3",
         "$l": "$4",
         "$a": "$5"
-    } as { [index: string]: string }
+    } as { [i: string]: string }
     private traitRgexp = /{{[^{}]*?}}|\^|#|@|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 

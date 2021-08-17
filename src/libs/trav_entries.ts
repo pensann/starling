@@ -1,4 +1,6 @@
-// Entries为数据列表
+import { Starlog } from "./log";
+
+// Entries为数据列表，但可能需要单独处理
 const regexp_movies_reactions = /Data(\/|\\\\)MoviesReactions/i
 
 // PlainText: 直接提取
@@ -111,16 +113,21 @@ class Target {
 }
 
 export class Traversor4Entries {
-    public target: Target
     public entries: Entries
-    private re: RegExp
-    private i18n: DictKV
+    public target: Target
     private baseID: string
+    private reText: RegExp
+    private rei18n = /{{i18n:.*}}/
+    private i18n: DictKV
     private result: EntriesTravResult
-    constructor(target: string, entries: Entries, baseID: string, re: RegExp = /./m, i18n: DictKV = {}) {
+    private strHandler: {
+        func?: (str: string, ...args: any[]) => string,
+        args: any[]
+    } = { args: [] }
+    constructor(target: string, entries: Entries, baseID: string, reText: RegExp = /./m, i18n: DictKV = {}) {
         this.target = new Target(target)
         this.entries = entries
-        this.re = re
+        this.reText = reText
         this.i18n = i18n
         this.baseID = baseID
         this.result = {
@@ -129,6 +136,15 @@ export class Traversor4Entries {
         }
         Object.assign(this.result.alter, this.entries)
     }
+    private getValue(value: string) {
+        if (this.i18n && this.rei18n.test(value)) {
+            const result = this.i18n[value.slice(7, -2)]
+            if (result) {
+                value = result
+            }
+        }
+        return value
+    }
     /**
      * traverse
      */
@@ -136,17 +152,19 @@ export class Traversor4Entries {
         strHandler?: (str: string, ...args: any[]) => string,
         ...args: any[]
     ): EntriesTravResult {
+        this.strHandler.func = strHandler
+        this.strHandler.args = args
         for (let [key, value] of Object.entries(this.entries)) {
             // 首先根据Target区分Entries的遍历器
             switch (this.target.type) {
                 case EntriesType.PlainText:
                     if (value = value as string) {
-                        this.plainTextTrav(key, value, strHandler, ...args)
+                        this.plainTextTrav(key, value)
                     }
                     break;
                 case EntriesType.EventsLike:
                     if (value = value as string) {
-                        this.eventsLikeTrav(key, value, strHandler, ...args)
+                        this.eventsLikeTrav(key, value)
                     }
                     break;
                 case EntriesType.Festivals:
@@ -156,15 +174,25 @@ export class Traversor4Entries {
                             // DO NOTHING
                         }
                         else if (/"\s*\//.test(value)) {
-                            this.eventsLikeTrav(key, value, strHandler, ...args)
+                            this.eventsLikeTrav(key, value)
                         } else {
-                            this.plainTextTrav(key, value, strHandler, ...args)
+                            this.plainTextTrav(key, value)
                         }
                     }
                     break;
                 case EntriesType.MoviesReactions:
                     if (value = value as MoviesReactionValue) {
-                        this.moviesReactionsTrav(key, value, strHandler, ...args)
+                        this.moviesReactionsTrav(key, value)
+                    }
+                    break;
+                case EntriesType.NPCDispositions:
+                    if (value = value as string) {
+                        this.npcDispositionsTrav(key, value)
+                    }
+                    break;
+                case EntriesType.NPCGiftTastes:
+                    if (value = value as string) {
+                        this.npcGiftTastsTrav(key, value, strHandler, ...args)
                     }
                     break;
                 // Do more here...
@@ -176,22 +204,18 @@ export class Traversor4Entries {
     }
     private plainTextTrav(
         key: string, value: string,
-        strHandler?: (str: string, ...args: any[]) => string, ...args: any
     ) {
-        if (/{{i18n:.*}}/.test(value)) {
-            value = this.i18n[value.slice(7, -2)]
+        value = this.getValue(value)
+        if (this.strHandler.func) {
+            this.result.alter[key] = this.strHandler.func!(value, ...this.strHandler.args)
         }
-        if (this.re.test(value)) {
+        if (this.reText.test(value)) {
             this.result.dict[this.baseID + key] = value
-        }
-        if (strHandler) {
-            this.result.alter[key] = strHandler(value, ...args)
         }
     }
     private eventsLikeTrav(
         key: string,
         value: string,
-        strHandler?: (str: string, ...args: any[]) => string, ...args: any
     ) {
         const qtMarkNum = (() => {
             const matchList = value.match(/\"/g)
@@ -199,28 +223,29 @@ export class Traversor4Entries {
         })()
         if (qtMarkNum % 2) {
             Starlog.warnning(`文本包含未闭合引号，使用全字匹配模式...\n\x1B[38;5;65m${value}\x1B[0m`)
-            // TODO 处理包含奇数引号的文本
-            this.result.dict[this.baseID + key] = value
-            if (strHandler) {
-                this.result.alter[key] = strHandler(value, ...args)
-            }
+            // 处理包含奇数引号的文本
+            this.plainTextTrav(key, value)
         }
         else {
-            // TODO 处理Events文本
+            // 处理Events文本
             const re = /\".*?\"/g
             let arr;
             let index = 0
             while ((arr = re.exec(value)) !== null) {
                 index += 1
                 const str = arr[0]
-                if (this.re.test(str)) {
-                    this.result.dict[this.baseID + key + "." + index] = str.substring(1, str.length - 1)
+                if (this.reText.test(str)) {
+                    let value = str.substring(1, str.length - 1)
+                    if (this.rei18n.test(value)) {
+                        value = this.i18n[value.slice(7, -2)]
+                    }
+                    this.result.dict[this.baseID + key + "." + index] = value
                 }
             }
-            if (strHandler) {
+            if (this.strHandler.func) {
                 this.result.alter[key] = value.replace(/\".*?\"/g, (s) => {
                     const str = s.substring(1, s.length - 1)
-                    return "\"" + strHandler(str, ...args) + "\""
+                    return "\"" + this.strHandler.func!(str, ...this.strHandler.args) + "\""
                 })
             }
         }
@@ -228,7 +253,6 @@ export class Traversor4Entries {
     private moviesReactionsTrav(
         key: string,
         value: MoviesReactionValue,
-        strHandler?: (str: string, ...args: any[]) => string, ...args: any
     ) {
         let n = 0
         value.Reactions.forEach((reaction) => {
@@ -236,11 +260,15 @@ export class Traversor4Entries {
                 for (const [keySPR, valueSPR] of Object.entries(reaction.SpecialResponses)) {
                     if (valueSPR && valueSPR.Text) {
                         // 将字符串提取至字典
-                        this.result.dict[this.baseID + key + keySPR + "." + n] = valueSPR.Text
+                        valueSPR.Text = this.getValue(valueSPR.Text)
+                        if (this.reText.test(valueSPR.Text)) {
+                            this.result.dict[this.baseID + key + keySPR + "." + n] = valueSPR.Text
+                        }
                         // 处理字符串
-                        if (strHandler) {
+                        if (this.strHandler.func) {
                             const o = this.result.alter[key] as MoviesReactionValue
-                            o["Reactions"][n]["SpecialResponses"]![keySPR]["Text"] = strHandler(valueSPR.Text, ...args)
+                            o["Reactions"][n]["SpecialResponses"]![keySPR]["Text"] =
+                                this.strHandler.func!(valueSPR.Text, ...this.strHandler.args)
                             this.result.alter[key] = o
                         }
                     }
@@ -248,5 +276,55 @@ export class Traversor4Entries {
             }
             n += 1
         })
+    }
+    private npcDispositionsTrav(
+        key: string,
+        value: string,
+    ) {
+        const strLi = value.split(/\s*\/\s*/)
+        if (strLi.length) {
+            const index = strLi.length - 1
+            // 原字符串提取到字典
+            if (strLi[index]) {
+                strLi[index] = this.getValue(strLi[index])
+                if (this.reText.test(strLi[index])) {
+                    this.result.dict[this.baseID + key] = strLi[index]
+                }
+                if (this.strHandler.func) {
+                    // 处理字符串
+                    strLi[index] = this.strHandler.func!(strLi[index], ...this.strHandler.args)
+                }
+            }
+        }
+        // ? （可能有问题）处理后的字符串输出到alter
+        this.result.alter[key] = strLi.join("/")
+    }
+    private npcGiftTastsTrav(
+        key: string,
+        value: string,
+        strHandler?: (str: string, ...args: any[]) => string, ...args: any
+    ) {
+        const strLi = value.split(/\s*\/\s*/)
+        if (strLi.length) {
+            let n = 0
+            // 遍历字符串文字，其中模2片段为需要翻译的字符串
+            while (n < strLi.length) {
+                if (!(n % 2)) {
+                    if (strLi[n]) {
+                        strLi[n] = this.getValue(strLi[n])
+                        // 原字符串提取到字典
+                        if (this.reText.test(strLi[n])) {
+                            this.result.dict[this.baseID + key + "." + n] = strLi[n]
+                        }
+                        // 处理字符串
+                        if (strHandler) {
+                            strLi[n] = strHandler(strLi[n], ...args)
+                        }
+                    }
+                }
+                n += 1
+            }
+            this.result.alter[key] = strLi.join("/")
+        }
     }
 }

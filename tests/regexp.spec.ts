@@ -106,4 +106,32 @@ describe("traverse Testing", () => {
             }
         }).toStrictEqual(r.alter)
     });
+    it("traverse text in npc dispositions", () => {
+        const entries: Entries = { "Olivia": "adult/polite/neutral/positive/female/datable/null/Town/spring 15//Custom_JenkinsHouse 18 5/Olivia" }
+        const r = new Traversor4Entries("Data/NPCDispositions", entries, "[baseID]")
+            .traverse((s: string) => "hiya!")
+        expect({ "[baseID]Olivia": "Olivia" })
+            .toStrictEqual(r.dict)
+        expect({ "Olivia": "adult/polite/neutral/positive/female/datable/null/Town/spring 15//Custom_JenkinsHouse 18 5/hiya!" })
+            .toStrictEqual(r.alter)
+    });
+    it("traverse text in npc gift tasts", () => {
+        const entries: Entries = {
+            "Olivia": "Oh, my! For me? This is truly an exquisite gift. Thank you, dear!/124 125 348 220 221/This is so thoughtful of you, sweetie! Thank you./336 432 276 608 421/Oh? I don't like this.../18 16 20 22 24 408 80 416 414 412 296 398 410 152 396 397 399/This really isn't appropriate. I'll promptly throw this out!/330 284 149 151 459 346 304/This is a thoughtful gift, dear. Thank you./446 402 418/"
+        }
+        const r = new Traversor4Entries("Data/NPCGiftTastes", entries, "[baseID]")
+            .traverse((s: string) => "hiya!")
+        expect({
+            "[baseID]Olivia.0": "Oh, my! For me? This is truly an exquisite gift. Thank you, dear!",
+            "[baseID]Olivia.2": "This is so thoughtful of you, sweetie! Thank you.",
+            "[baseID]Olivia.4": "Oh? I don't like this...",
+            "[baseID]Olivia.6": "This really isn't appropriate. I'll promptly throw this out!",
+            "[baseID]Olivia.8": "This is a thoughtful gift, dear. Thank you.",
+        })
+            .toStrictEqual(r.dict)
+        expect({ 
+            "Olivia": "hiya!/124 125 348 220 221/hiya!/336 432 276 608 421/hiya!/18 16 20 22 24 408 80 416 414 412 296 398 410 152 396 397 399/hiya!/330 284 149 151 459 346 304/hiya!/446 402 418/"
+        })
+            .toStrictEqual(r.alter)
+    });
 });

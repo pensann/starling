@@ -14,7 +14,7 @@ interface Include extends BaseChange {
 interface CommonFields extends BaseChange {
     Action: "Load" | "EditImage" | "EditData" | "EditMap",
     Target: string,
-    When?: { [index: string]: string },
+    When?: { [i: string]: string },
     LogName?: string,
     Enabled?: boolean,
     Update?: string
@@ -29,7 +29,7 @@ interface EditData extends CommonFields {
     Action: "EditData",
     Fields?: any,
     Entries?: Entries,
-    MoveEntries?: { [index: string]: string },
+    MoveEntries?: { [i: string]: string },
     TextOperations?: TextOperations[]
 }
 
@@ -70,7 +70,7 @@ interface Coordinate {
 }
 
 interface Entries {
-    [index: string]: string | null | MoviesReactionValue // EntriesMoviesModel | EntriesListAssets
+    [i: string]: string | null | MoviesReactionValue // EntriesMoviesModel | EntriesListAssets
 }
 
 interface MoviesReactionValue {
@@ -81,9 +81,9 @@ interface MoviesReactionValue {
         Response: string
         Whitelist: any[],
         SpecialResponses: null | {
-            [index: string]: {
+            [i: string]: {
                 Text?: string
-                [index: string]: string | undefined | null
+                [i: string]: string | undefined | null
             }
         },
     }[]
