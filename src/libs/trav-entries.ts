@@ -117,7 +117,7 @@ export class Traversor4Entries {
     public target: Target
     private baseID: string
     private reText: RegExp
-    private rei18n = /{{i18n:.*}}/
+    private rei18n = /{{i18n:.*?}}/
     private i18n: DictKV
     private result: EntriesTravResult
     private strHandler: {
@@ -136,14 +136,29 @@ export class Traversor4Entries {
         }
         Object.assign(this.result.alter, this.entries)
     }
+    public static getValuei18n(value: string, i18n: DictKV) {
+        // !!!fix for RSV
+        // TODO 以后会修复这个问题
+        value = value.replace(/"\s*#/g,"")
+        return value.replace(/{{i18n:.*?}}/g, (s) => {
+            const result = i18n[s.slice(7, -2)]
+            return result ? result : s
+        })
+    }
     private getValue(value: string) {
-        if (this.i18n && this.rei18n.test(value)) {
-            const result = this.i18n[value.slice(7, -2)]
-            if (result) {
-                value = result
-            }
+        if (this.i18n) {
+            return Traversor4Entries.getValuei18n(value, this.i18n)
+        } else {
+            return value
         }
-        return value
+
+        // if (this.i18n && this.rei18n.test(value)) {
+        //     const result = this.i18n[value.slice(7, -2)]
+        //     if (result) {
+        //         value = result
+        //     }
+        // }
+        // return value
     }
     /**
      * traverse
@@ -217,6 +232,11 @@ export class Traversor4Entries {
         key: string,
         value: string,
     ) {
+        // value = 
+        value = this.getValue(value)
+        // if (value.includes("playful/14 22/farmer 10 23 1 Ian 13 16 2/skippable/addTemporaryActor RSVCart1 16 32 13 17 2 false")) {
+        //     throw new Error("DEBUG!");
+        // }
         const qtMarkNum = (() => {
             const matchList = value.match(/\"/g)
             return matchList ? matchList.length : 0
@@ -236,9 +256,6 @@ export class Traversor4Entries {
                 const str = arr[0]
                 if (this.reText.test(str)) {
                     let value = str.substring(1, str.length - 1)
-                    if (this.rei18n.test(value)) {
-                        value = this.i18n[value.slice(7, -2)]
-                    }
                     this.result.dict[this.baseID + key + "." + index] = value
                 }
             }
