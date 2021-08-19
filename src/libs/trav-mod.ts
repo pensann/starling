@@ -1,5 +1,5 @@
 import { parseJSON } from "./parser";
-import { Traversor4Entries } from "./trav-entries";
+import { Trav4Entries } from "./trav-entries";
 import { join, resolve, basename, extname } from "path";
 import { Starlog } from "./log";
 import { existsSync } from "fs";
@@ -80,7 +80,7 @@ export class Traversor4Mod {
             } else if (changeUnknownType.Action == "EditData") {
                 const change = changeUnknownType as EditData
                 if (change.Entries) {
-                    traversor = new Traversor4Entries(change.Target, change.Entries, this.getBaseID(change), this.re, this.i18n)
+                    traversor = new Trav4Entries(change.Target, change.Entries, this.getBaseID(change), this.re, this.i18n)
                     Object.assign(result, traversor.traverse().dict)
                     change.Entries = traversor.traverse(this.translator).alter
                 }
@@ -97,7 +97,7 @@ export class Traversor4Mod {
                         // TODO 
                         const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, basename(target))
                         if (!(STATIC_FILE_LIST.indexOf(file) > -1)) {
-                            traversor = new Traversor4Entries(change.Target, this.read(file), this.getBaseID(change), this.re, this.i18n)
+                            traversor = new Trav4Entries(change.Target, this.read(file), this.getBaseID(change), this.re, this.i18n)
                             Object.assign(result, traversor.traverse().dict)
                             if (convertToi18n) {
                                 buildTarget(join(this.modPath, file), JSON.stringify(traversor.traverse(this.translator).alter, undefined, 2))

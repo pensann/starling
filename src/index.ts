@@ -2,7 +2,7 @@ import { parseJSON } from "./libs/parser"
 import { Lang, Traversor4Mod } from "./libs/trav-mod"
 import { loadProject, mergeDict } from "./libs/stardict";
 import { buildTarget } from "./libs/builder";
-import { Traversor4Entries } from "./libs/trav-entries";
+import { Trav4Entries } from "./libs/trav-entries";
 import { Starlog } from "./libs/log";
 import { join } from "path";
 

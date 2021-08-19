@@ -95,7 +95,7 @@ class Target {
     constructor(str: string) {
         this.str = str
     }
-    public static parseString(str: string): Target[] {
+    public static fromStr(str: string): Target[] {
         const strLi = str.split(/\s*,\s*/g)
         const result = []
         for (let index = 0; index < strLi.length; index++) {
@@ -114,7 +114,7 @@ class Target {
     }
 }
 
-export class Traversor4Entries {
+export class Trav4Entries {
     public entries: Entries
     public target: Target
     private baseID: string
@@ -149,7 +149,7 @@ export class Traversor4Entries {
     private getValue(value: string) {
         value = value.replace(/{{TargetWithoutPath}}/gi, basename(this.target.str))
         if (this.i18n) {
-            return Traversor4Entries.getValuei18n(value, this.i18n)
+            return Trav4Entries.getValuei18n(value, this.i18n)
         } else {
             return value
         }
