@@ -1,8 +1,8 @@
 import { parseJSON } from "./libs/parser"
-import { Lang, Traversor4Mod } from "./libs/trav-mod"
+import { Lang, Trav4Mod } from "./libs/trav-files"
 import { loadProject, mergeDict } from "./libs/stardict";
 import { buildTarget } from "./libs/builder";
-import { Trav4Entries } from "./libs/trav-entries";
+import { TravEntries } from "./libs/trav-entries";
 import { Starlog } from "./libs/log";
 import { join } from "path";
 
@@ -27,7 +27,7 @@ const dist = "res/RSV/Ridgeside Village/[CP] Ridgeside Village-zh"
 rmDir(dist)
 spawnSync('mv', [src, srcDisable])
 spawnSync('cp', ['-r', srcDisable, dist])
-const t = new Traversor4Mod(dist)
+const t = new Trav4Mod(dist)
 t.loadFile("content.json")
 Object.assign(dict, t.extractText(Lang.default,true))
 buildTarget(join(dist, "i18n", "default.json"), JSON.stringify(dict, undefined, 4))

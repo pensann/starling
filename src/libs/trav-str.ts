@@ -5,20 +5,15 @@
 
 import { createHash } from "crypto";
 import { Starlog } from "./log";
+import { Traversor, TRAVERSE_DICT } from "./trav";
 
-export const TRAVERSE_DICT: DictKV = {}
-
-export class Trav4Str {
-    public args: any[] = []
-    public baseID: string
-    public re = /./
-    public textHandler: ((str: string, ...args: any[]) => string) | undefined
+export class TravStr extends Traversor {
     public readonly str: string
     constructor(str: string, baseID: string) {
+        super(baseID)
         this.str = str
-        this.baseID = baseID
     }
-    public getID(id: string, value: string) {
+    public getID(id: string, value: string): string {
         const idExists = (() => {
             for (const [idExists, valueExists] of Object.entries(TRAVERSE_DICT)) {
                 if (value == valueExists) {
@@ -36,24 +31,24 @@ export class Trav4Str {
         }
     }
     private traverse(value: string, id: string): string {
-        const trav = new Trav4Str(value, id)
+        const trav = new TravStr(value, id)
         trav.args = this.args
         trav.re = this.re
         trav.textHandler = this.textHandler
         trav.getID = this.getID
-        return trav.travPlainText()
+        return trav.plainText()
     }
-    public travPlainText(): string {
+    public plainText(): string {
         const id = this.getID(this.baseID, this.str)
         if (this.re.test(this.str)) {
             TRAVERSE_DICT[id] = this.str
             if (this.textHandler) {
-                return this.textHandler(this.str, ...this.args)
+                return this.textHandler(this.str, id, ...this.args)
             }
         }
         return this.str
     }
-    public travEventsLike(): string {
+    public eventsLike(): string {
         const qtMarkNum = (() => {
             const matchList = this.str.match(/\"/g)
             return matchList ? matchList.length : 0
@@ -61,7 +56,7 @@ export class Trav4Str {
         if (qtMarkNum % 2) {
             Starlog.warnning(`文本包含未闭合引号，使用全字匹配模式...\n\x1B[38;5;65m${this.str}\x1B[0m`)
             // 处理包含奇数引号的文本
-            return this.travPlainText()
+            return this.plainText()
         }
         else {
             let index = -1
@@ -71,7 +66,7 @@ export class Trav4Str {
             })
         }
     }
-    public travNpcGiftTastes(): string {
+    public npcGiftTastes(): string {
         const strLi = this.str.split(/\s*\/\s*/)
         // 遍历字符串文字，其中模2片段为需要翻译的字符串
         for (let index = 0; index < strLi.length; index++) {
@@ -81,7 +76,7 @@ export class Trav4Str {
         }
         return strLi.join("/")
     }
-    public travNpcDispositions() {
+    public npcDispositions() {
         const strLi = this.str.split(/\s*\/\s*/)
         const index = 11
         if (strLi[index]) {
