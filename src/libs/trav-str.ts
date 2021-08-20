@@ -8,6 +8,7 @@ import { Starlog } from "./log";
 import { Traversor, TRAVERSE_DICT } from "./trav";
 
 let repeatedIdIndex = 0
+export const REPEATED_ID_LIST: string[] = []
 export class TravStr extends Traversor {
     public readonly str: string
     constructor(str: string, baseID: string) {
@@ -15,8 +16,10 @@ export class TravStr extends Traversor {
         this.str = str
     }
     public getID(id: string, value: string): string {
-        const fmt = (s: string) => {
-            return createHash("sha1").update(s).digest('hex')
+        const fmt = (id: string) => {
+            // return id
+            // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
+            return createHash("sha1").update(id).digest('hex').slice(0, 8)
         }
         try {
             const idExists = (() => {
@@ -36,7 +39,9 @@ export class TravStr extends Traversor {
             }
         } catch (error) {
             repeatedIdIndex++
-            return fmt(id + "." + repeatedIdIndex)
+            const repeatedId = id + "." + repeatedIdIndex
+            REPEATED_ID_LIST.push(id + "." + repeatedIdIndex)
+            return fmt(repeatedId)
         }
 
     }

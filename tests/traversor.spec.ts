@@ -3,15 +3,15 @@ import { TravStr } from "../src/libs/trav-str";
 import { TravEntries } from "../src/libs/trav-entries";
 
 describe("trav-str.ts testing", () => {
-    it("throw error when different values using a same id", () => {
-        for (const key in TRAVERSE_DICT) {
-            delete TRAVERSE_DICT[key]
-        }
-        const trav = new TravStr("aloha", "baseID")
-        const trav2 = new TravStr("aloha2", "baseID")
-        trav.plainText()
-        expect(() => { trav2.plainText() }).toThrowError("Multiple values(aloha,aloha2) using a same id(baseID)!")
-    })
+    // it("throw error when different values using a same id", () => {
+    //     for (const key in TRAVERSE_DICT) {
+    //         delete TRAVERSE_DICT[key]
+    //     }
+    //     const trav = new TravStr("aloha", "baseID")
+    //     const trav2 = new TravStr("aloha2", "baseID")
+    //     trav.plainText()
+    //     expect(() => { trav2.plainText() }).toThrowError("Multiple values(aloha,aloha2) using a same id(baseID)!")
+    // })
     it("won't extract duplicated value by default.", () => {
         for (const key in TRAVERSE_DICT) {
             delete TRAVERSE_DICT[key]
@@ -101,20 +101,20 @@ describe("trav-str.ts testing", () => {
         for (const key in TRAVERSE_DICT) {
             delete TRAVERSE_DICT[key]
         }
-        const trav = new TravStr("/hi//////////Victor", "baseID")
+        const trav = new TravStr("/hi//////////Someone", "baseID")
         trav.getID = (s) => s
         trav.npcDispositions()
-        expect({ "baseID": "Victor" }).toStrictEqual(TRAVERSE_DICT)
+        expect({ "baseID": "Someone" }).toStrictEqual(TRAVERSE_DICT)
     })
     it("traverse npc dispositions text, handle and extract text", () => {
         for (const key in TRAVERSE_DICT) {
             delete TRAVERSE_DICT[key]
         }
-        const trav = new TravStr("/hi//////////Victor", "baseID")
+        const trav = new TravStr("/hi//////////Someone", "baseID")
         trav.getID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect("/hi//////////hiya!").toEqual(trav.npcDispositions())
-        expect({ "baseID": "Victor" }).toStrictEqual(TRAVERSE_DICT)
+        expect({ "baseID": "Someone" }).toStrictEqual(TRAVERSE_DICT)
     })
 })
 
