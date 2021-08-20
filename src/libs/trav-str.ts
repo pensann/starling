@@ -7,6 +7,7 @@ import { createHash } from "crypto";
 import { Starlog } from "./log";
 import { Traversor, TRAVERSE_DICT } from "./trav";
 
+let repeatedIdIndex = 0
 export class TravStr extends Traversor {
     public readonly str: string
     constructor(str: string, baseID: string) {
@@ -14,26 +15,35 @@ export class TravStr extends Traversor {
         this.str = str
     }
     public getID(id: string, value: string): string {
-        const idExists = (() => {
-            for (const [idExists, valueExists] of Object.entries(TRAVERSE_DICT)) {
-                if (value == valueExists) {
-                    return idExists
-                } else if (id != idExists) {
-                    throw new Error(`Multiple values(${valueExists},${value}) use a same id(${id})!`);
-                }
-            }
-        })()
-        if (idExists) {
-            return idExists
-        } else {
-            // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
-            return createHash("sha1").update(JSON.stringify(id)).digest('hex')
+        const fmt = (s: string) => {
+            return createHash("sha1").update(s).digest('hex')
         }
+        try {
+            const idExists = (() => {
+                for (const [idNow, valueNow] of Object.entries(TRAVERSE_DICT)) {
+                    if (value == valueNow) {
+                        return idNow
+                    } else if (fmt(id) == idNow) {
+                        throw new Error(`Multiple values(${valueNow},${value}) using a same id(${id})!`);
+                    }
+                }
+            })()
+            if (idExists) {
+                return idExists
+            } else {
+                // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
+                return fmt(id)
+            }
+        } catch (error) {
+            repeatedIdIndex++
+            return fmt(id + "." + repeatedIdIndex)
+        }
+
     }
     private traverse(value: string, id: string): string {
         const trav = new TravStr(value, id)
         trav.args = this.args
-        trav.re = this.re
+        trav.lang = this.lang
         trav.textHandler = this.textHandler
         trav.getID = this.getID
         return trav.plainText()

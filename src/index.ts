@@ -1,23 +1,18 @@
-import { parseJSON } from "./libs/parser"
-import { Lang, Trav4Mod } from "./libs/trav-files"
-import { loadProject, mergeDict } from "./libs/stardict";
+import { Lang } from "./libs/trav"
 import { buildTarget } from "./libs/builder";
-import { TravEntries } from "./libs/trav-entries";
-import { Starlog } from "./libs/log";
 import { join } from "path";
 
 
 import { spawnSync } from "child_process";
-import { rmdirSync } from "fs";
 import { rmDir } from "./libs/rmdir";
-const dict = {}
-const src = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
-const srcDisable = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
-const dist = "res/RSV/Ridgeside Village/[CP] Ridgeside Village-zh"
+import { TravFiles } from "./libs/trav-files";
+// const src = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
+// const srcDisable = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
+// const dist = "res/RSV/Ridgeside Village/[CP] Ridgeside Village-i18n"
 
-// const src = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded"
-// const srcDisable = "res/SVE/SVE1.13.11/Stardew Valley Expanded/.[CP] Stardew Valley Expanded"
-// const dist = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded-i18n"
+const src = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded"
+const srcDisable = "res/SVE/SVE1.13.11/Stardew Valley Expanded/.[CP] Stardew Valley Expanded"
+const dist = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded-i18n"
 
 // const src = "res/SVE/SVE1.13.10/Stardew Valley Expanded/[CP] Stardew Valley Expanded"
 // const srcDisable = "res/SVE/SVE1.13.10/Stardew Valley Expanded/.[CP] Stardew Valley Expanded"
@@ -27,10 +22,14 @@ const dist = "res/RSV/Ridgeside Village/[CP] Ridgeside Village-zh"
 rmDir(dist)
 spawnSync('mv', [src, srcDisable])
 spawnSync('cp', ['-r', srcDisable, dist])
-const t = new Trav4Mod(dist)
-t.loadFile("content.json")
-Object.assign(dict, t.extractText(Lang.default,true))
-buildTarget(join(dist, "i18n", "default.json"), JSON.stringify(dict, undefined, 4))
+const trav = new TravFiles(dist)
+trav.textHandler = (_, id) => {
+    return `{{i18n:${id}}}`
+}
+buildTarget(
+    join(dist, "i18n", "default.json"),
+    JSON.stringify(trav.traverse("content.json"), undefined, 4)
+)
 
 // buildTarget("res/test.json", JSON.stringify(dict, undefined, 2))
 // const dictch = {}

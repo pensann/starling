@@ -1,45 +1,19 @@
 import { parseJSON } from "./parser";
 import { TravEntries } from "./trav-entries";
-import { join, resolve, basename, extname } from "path";
+import { join, resolve, extname } from "path";
+import { buildTarget } from "./builder";
+import { Traversor, TRAVERSE_DICT, Lang } from "./trav";
+import { Target } from "./target";
 import { Starlog } from "./log";
 import { existsSync } from "fs";
-import { buildTarget } from "./builder";
-import { Traversor } from "./trav";
-
-export enum Lang {
-    default,
-    zh
-}
 
 export class TravFiles extends Traversor {
-    private readonly modPath: string
-    private filename: string = ""
-    constructor(modPath: string) {
-        super("")
-        this.modPath = resolve(modPath)
+    private readonly modFolder: string
+    constructor(modfolder: string) {
+        super()
+        this.modFolder = resolve(modfolder)
     }
-    public loadFile(...paths: string[]) {
-        this.filename = join(this.modPath, ...paths)
-        this.content = parseJSON(this.filename)
-        Starlog.debug("LoadFile:", this.filename)
-    }
-    private loadi18n(lang = Lang.default) {
-        if (existsSync(join(this.modPath, "i18n"))) {
-            switch (lang) {
-                case Lang.zh:
-                    this.re = /[^\x00-\xff]/m
-                    this.i18n = this.read("i18n", "zh.json")
-                    break;
-                default:
-                    this.i18n = this.read("i18n", "default.json")
-                    break;
-            }
-        }
-    }
-    public read(...paths: string[]) {
-        return parseJSON(join(this.modPath, ...paths))
-    }
-    private getBaseID(change: CommonFields): string {
+    private getChangeID(change: CommonFields): string {
         return change.Action + change.Target + (() => {
             let str = ""
             if (change.When) {
@@ -53,70 +27,69 @@ export class TravFiles extends Traversor {
             return str
         })()
     }
-    public extractText(lang = Lang.default, convertToi18n = false): DictKV {
-        const result: DictKV = {}
-        this.loadi18n(lang)
-        // 开始提取
+    public traverse(fileRelPath: string): DictKV {
+        const content = parseJSON(join(this.modFolder, fileRelPath)) as CommonContent
         const changeList = []
-        for (let index = 0; index < this.content.Changes.length; index++) {
-            const changeUnknownType = this.content.Changes[index] as BaseChange
-            let traversor
-            const fileList = []
+        Starlog.info(`Traversing file: ${join(this.modFolder, fileRelPath)}`)
+        for (let index = 0; index < content.Changes.length; index++) {
+            const changeUnknownType = content.Changes[index] as BaseChange
+            Starlog.infoOneLine(`Traversing change ${index}`)
             if (changeUnknownType.Action == "Include") {
                 const change = changeUnknownType as Include
-                traversor = new Trav4Mod(this.modPath)
-                // 循环所有的Include
-                fileList.length = 0
-                fileList.push(...change.FromFile.split(/\s*,\s*/))
-                for (let index = 0; index < fileList.length; index++) {
-                    const file = fileList[index];
-                    traversor.loadFile(file)
-                    Object.assign(result, traversor.extractText(lang))
-                }
+                change.FromFile.split(/\s*,\s*/).forEach((file) => {
+                    this.traverse(file)
+                })
             } else if (changeUnknownType.Action == "EditData") {
                 const change = changeUnknownType as EditData
                 if (change.Entries) {
-                    traversor = new TravEntries(change.Target, change.Entries, this.getBaseID(change), this.re, this.i18n)
-                    Object.assign(result, traversor.traverse().dict)
-                    change.Entries = traversor.traverse(this.translator).alter
+                    const trav = new TravEntries(change.Target, change.Entries, this.getChangeID(change))
+                    const i18nFile = join(this.modFolder, "i18n", this.lang + ".json")
+                    trav.lang = this.lang
+                    trav.textHandler = this.textHandler
+                    if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
+                    change.Entries = trav.traverse()
                 }
-                // 写入ChangeList
                 changeList.push(change)
                 // TODO 支持Field等其它字段翻译
             } else if (changeUnknownType.Action == "Load") {
                 const change = changeUnknownType as Load
                 // load的Target可能为多个,仅处理json文件
                 const targetList = change.Target.split(/\s*,\s*/)
-                for (let index = 0; index < targetList.length; index++) {
-                    const target = targetList[index]
+                targetList.forEach((targetStr) => {
                     if (extname(change.FromFile) == ".json") {
-                        // TODO 
-                        const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, basename(target))
-                        if (!(STATIC_FILE_LIST.indexOf(file) > -1)) {
-                            traversor = new TravEntries(change.Target, this.read(file), this.getBaseID(change), this.re, this.i18n)
-                            Object.assign(result, traversor.traverse().dict)
-                            if (convertToi18n) {
-                                buildTarget(join(this.modPath, file), JSON.stringify(traversor.traverse(this.translator).alter, undefined, 2))
+                        const target = new Target(targetStr)
+                        const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
+                        const entries = parseJSON(join(this.modFolder, file))
+                        const trav = new TravEntries(target.str, entries, this.getChangeID(change))
+                        trav.lang = this.lang
+                        if (this.textHandler) {
+                            // 需要翻译的话，需要把文件转换为EditData后应用
+                            const i18nFile = join(this.modFolder, "i18n", this.lang + "json")
+                            trav.textHandler = this.textHandler
+                            if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
+                            const changeNew: EditData = {
+                                Action: "EditData",
+                                Target: target.str,
+                                Entries: trav.traverse()
                             }
-                            STATIC_FILE_LIST.push(file)
+                            changeList.push(changeNew)
+                        } else {
+                            trav.traverse()
                         }
                     }
-                }
+                })
                 changeList.push(change)
             } else {
                 changeList.push(changeUnknownType)
             }
-
         }
-        if (convertToi18n) {
-            const content = {} as { [i: string]: any }
-            Object.assign(content, this.content)
-            content["Changes"] = changeList
+        content["Changes"] = changeList
+        if (this.textHandler) {
             buildTarget(
-                this.filename,
+                join(this.modFolder, fileRelPath),
                 JSON.stringify(content, undefined, 4))
         }
-        return result
+        return TRAVERSE_DICT
     }
     private translator(str: string, id: string): string {
         return `{{i18n:${id}}}`

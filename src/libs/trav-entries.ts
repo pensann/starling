@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
+import { Starlog } from "./log";
 import { Target, TargetType } from "./target";
-import { Traversor } from "./trav";
+import { Traversor, Lang } from "./trav";
 import { TravStr } from "./trav-str";
 export class TravEntries extends Traversor {
     public entries: Entries
@@ -21,6 +22,16 @@ export class TravEntries extends Traversor {
             })
         }
         return value
+    }
+    private travStr(str: string, baseID: string): TravStr {
+        const trav = new TravStr(str, baseID)
+        trav.textHandler = this.textHandler
+        trav.args = this.args
+        trav.lang = this.lang
+        if (this.getID) {
+            trav.getID = this.getID
+        }
+        return trav
     }
     public traverse(): Entries {
         const result: Entries = {}
@@ -85,15 +96,5 @@ export class TravEntries extends Traversor {
             }
         }
         return result
-    }
-    private travStr(str: string, baseID: string): TravStr {
-        const trav = new TravStr(str, baseID)
-        trav.textHandler = this.textHandler
-        trav.args = this.args
-        trav.re = this.re
-        if (this.getID) {
-            trav.getID = this.getID
-        }
-        return trav
     }
 }
