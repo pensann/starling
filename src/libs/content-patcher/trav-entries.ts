@@ -1,13 +1,10 @@
-import { createHash } from "crypto";
-import { Starlog } from "./log";
 import { Target, TargetType } from "./target";
-import { Traversor, Lang } from "./trav";
+import { Traversor } from "../traversor";
 import { TravStr } from "./trav-str";
 export class TravEntries extends Traversor {
     public entries: Entries
     public target: Target
     public i18n: DictKV | undefined
-    public getID: ((id: string, value: string) => string) | undefined
     constructor(target: string, entries: Entries, baseID: string) {
         super(baseID)
         this.target = new Target(target)

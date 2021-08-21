@@ -4,46 +4,14 @@
  */
 
 import { createHash } from "crypto";
-import { Starlog } from "./log";
-import { Traversor, TRAVERSE_DICT } from "./trav";
+import { Starlog } from "../log";
+import { Traversor, TRAVERSE_DICT } from "../traversor";
 
-let repeatedIdIndex = 0
-export const REPEATED_ID_LIST: string[] = []
 export class TravStr extends Traversor {
     public readonly str: string
     constructor(str: string, baseID: string) {
         super(baseID)
         this.str = str
-    }
-    public getID(id: string, value: string): string {
-        const fmt = (id: string) => {
-            // return id
-            // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
-            return createHash("sha1").update(id).digest('hex').slice(0, 8)
-        }
-        try {
-            const idExists = (() => {
-                for (const [idNow, valueNow] of Object.entries(TRAVERSE_DICT)) {
-                    if (value == valueNow) {
-                        return idNow
-                    } else if (fmt(id) == idNow) {
-                        throw new Error(`Multiple values(${valueNow},${value}) using a same id(${id})!`);
-                    }
-                }
-            })()
-            if (idExists) {
-                return idExists
-            } else {
-                // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
-                return fmt(id)
-            }
-        } catch (error) {
-            repeatedIdIndex++
-            const repeatedId = id + "." + repeatedIdIndex
-            REPEATED_ID_LIST.push(id + "." + repeatedIdIndex)
-            return fmt(repeatedId)
-        }
-
     }
     private traverse(value: string, id: string): string {
         const trav = new TravStr(value, id)

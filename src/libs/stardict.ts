@@ -1,5 +1,5 @@
 import { join, resolve } from "path";
-import { StardewStr } from "./str";
+import { StardewStr } from "./content-patcher/str";
 import { create } from "xmlbuilder2"
 import { Starlog } from "./log";
 import { buildTarget } from "./builder";

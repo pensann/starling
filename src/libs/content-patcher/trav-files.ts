@@ -1,10 +1,10 @@
-import { parseJSON } from "./parser";
+import { parseJSON } from "../parser";
 import { TravEntries } from "./trav-entries";
 import { join, resolve, extname } from "path";
-import { buildTarget } from "./builder";
-import { Traversor, TRAVERSE_DICT, Lang } from "./trav";
+import { buildTarget } from "../builder";
+import { Traversor, TRAVERSE_DICT } from "../traversor";
 import { Target, TargetType } from "./target";
-import { Starlog } from "./log";
+import { Starlog } from "../log";
 import { existsSync } from "fs";
 
 export class TravFiles extends Traversor {

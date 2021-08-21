@@ -1,13 +1,23 @@
-import { buildTarget } from "./libs/builder";
-import { join } from "path";
+import { join, extname, resolve } from "path";
 
 
-import { spawnSync } from "child_process";
-import { rmDir } from "./libs/rmdir";
-import { TravFiles } from "./libs/trav-files";
+import { exec, spawnSync } from "child_process";
 import { loadProject } from "./libs/stardict";
 import { parseJSON } from "./libs/parser";
-import { REPEATED_ID_LIST } from "./libs/trav-str";
+import { readdirSync, statSync } from "fs";
+import { Starlog } from "./libs/log";
+
+function travel(dir: string, callback: Function) {
+    readdirSync(dir).forEach((file: string) => {
+        let pathname = join(dir, file)
+        if (statSync(pathname).isDirectory()) {
+            travel(pathname, callback)
+        } else {
+            callback(pathname)
+        }
+    })
+}
+
 // const src = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
 // const srcDisable = "res/RSV/Ridgeside Village/[CP] Ridgeside Village"
 // const dist = "res/RSV/Ridgeside Village/[CP] Ridgeside Village-i18n"
@@ -20,23 +30,6 @@ const dist = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Exp
 // const srcDisable = "res/SVE/SVE1.13.10/Stardew Valley Expanded/.[CP] Stardew Valley Expanded"
 // const dist = "res/SVE/SVE1.13.10/Stardew Valley Expanded/[CP] Stardew Valley Expanded-zh"
 
-
-function convertToI18n() {
-    rmDir(dist)
-    spawnSync('mv', [src, srcDisable])
-    spawnSync('cp', ['-r', srcDisable, dist])
-    const trav = new TravFiles(dist)
-    trav.textHandler = (_, id) => {
-        return `{{i18n:${id}}}`
-    }
-    buildTarget(
-        join(dist, "i18n", "default.json"),
-        JSON.stringify(trav.traverse("content.json"), undefined, 4)
-    )
-    buildTarget(
-        "res/SVE/repeated_id_list.json",
-        JSON.stringify(REPEATED_ID_LIST, undefined, 2))
-}
 
 function translate() {
     const dict: DictKV = loadProject("res/SVE/SVE-translate1.13.10")
@@ -54,9 +47,42 @@ function translate() {
         join(dist, "i18n", "zh.json"),
         JSON.stringify(content, undefined, 4)
     )
+    // JA
+    const dictja: { [index: string]: any } = {}
+    travel("res/SVE/SVE1.13.10/Stardew Valley Expanded/[JA] Stardew Valley Expanded", (m: any) => {
+        const ext = extname(m)
+        if (ext == ".json") {
+            Starlog.infoOneLine(m)
+            try {
+                const j = parseJSON(m)
+                if (j && j.NameLocalization) {
+                    dict[j.Name] = j.NameLocalization
+                }
+                if (j && j.DescriptionLocalization) {
+                    dict[j.Description] = j.DescriptionLocalization
+                }
+            } catch (error) {
+                exec("code '" + m + "'")
+                throw new Error(error);
+            }
+        }
+    })
+    travel("res/SVE/SVE1.13.11/Stardew Valley Expanded/[JA] Stardew Valley Expanded", (m: any) => {
+        const ext = extname(m)
+        if (ext == ".json") {
+            const j = parseJSON(m)
+            if (dict[j.Name]) {
+                j.NameLocalization = dict[j.Name]
+            }
+            if (dict[j.Description]) {
+                j.DescriptionLocalization = dict[j.Description]
+            }
+            buildTarget(resolve(m), JSON.stringify(j, undefined, 2))
+        }
+    })
 }
 
-convertToI18n()
+convertCPToI18n()
 translate()
 
 // buildTarget("res/test.json", JSON.stringify(dict, undefined, 2))

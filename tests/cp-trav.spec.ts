@@ -1,6 +1,6 @@
-import { TRAVERSE_DICT } from "../src/libs/trav";
-import { TravStr } from "../src/libs/trav-str";
-import { TravEntries } from "../src/libs/trav-entries";
+import { TRAVERSE_DICT } from "../src/libs/traversor";
+import { TravStr } from "../src/libs/content-patcher/trav-str";
+import { TravEntries } from "../src/libs/content-patcher/trav-entries";
 
 describe("trav-str.ts testing", () => {
     // it("throw error when different values using a same id", () => {
