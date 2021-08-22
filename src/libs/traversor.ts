@@ -4,8 +4,8 @@ import { join } from "path"
 
 let repeatedIdIndex = 0
 
-export const TRAVERSE_DICT: DictKV = {}
 export const REPEATED_ID_LIST: string[] = []
+export const TRAV_RESULT_DICT: DictKV = {}
 
 export enum Lang {
     default = "default",
@@ -13,6 +13,11 @@ export enum Lang {
 }
 
 export class Traversor {
+    public readonly emptyDict = () => {
+        for (const key in TRAV_RESULT_DICT) {
+            delete TRAV_RESULT_DICT[key]
+        }
+    }
     public args: any[] = []
     public baseID: string
     public lang = Lang.default
@@ -24,11 +29,14 @@ export class Traversor {
                 return /./
         }
     }
-    public textHandler: ((str: string, id: string, ...args: any[]) => string) | undefined
+    public textHandler: ((str: string, id?: string, ...args: any[]) => string) | undefined
     constructor(baseID: string = "") {
         this.baseID = baseID
     }
-    public getID(id: string, value: string): string {
+    public readonly getID = (id: string, value: string) => {
+        return this.getIDMethod(id, value)
+    }
+    public getIDMethod(id: string, value: string) {
         const fmt = (id: string) => {
             // return id
             // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
@@ -36,7 +44,7 @@ export class Traversor {
         }
         try {
             const idExists = (() => {
-                for (const [idNow, valueNow] of Object.entries(TRAVERSE_DICT)) {
+                for (const [idNow, valueNow] of Object.entries(TRAV_RESULT_DICT)) {
                     if (value == valueNow) {
                         return idNow
                     } else if (fmt(id) == idNow) {
@@ -56,17 +64,21 @@ export class Traversor {
             REPEATED_ID_LIST.push(id + "." + repeatedIdIndex)
             return fmt(repeatedId)
         }
-
     }
 }
 
-export function travel(dir: string, callback: Function) {
+export function travel(
+    dir: string,
+    callback: (pathName: string, fromPath: string) => void,
+    fromPath?: string
+) {
     readdirSync(dir).forEach((file: string) => {
         let pathname = join(dir, file)
+        fromPath = fromPath ? fromPath : dir
         if (statSync(pathname).isDirectory()) {
-            travel(pathname, callback)
+            travel(pathname, callback, fromPath)
         } else {
-            callback(pathname)
+            callback(pathname, fromPath)
         }
     })
 }

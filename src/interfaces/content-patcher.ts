@@ -88,3 +88,8 @@ interface MoviesReactionValue {
         },
     }[]
 }
+
+/** file */
+interface CommonContent {
+    Changes: BaseChange[]
+}

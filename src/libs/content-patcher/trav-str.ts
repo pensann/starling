@@ -3,9 +3,8 @@
  * 2. 文本遍历器不解决i18n读取功能
  */
 
-import { createHash } from "crypto";
 import { Starlog } from "../log";
-import { Traversor, TRAVERSE_DICT } from "../traversor";
+import { Traversor ,TRAV_RESULT_DICT} from "../traversor";
 
 export class TravStr extends Traversor {
     public readonly str: string
@@ -18,13 +17,13 @@ export class TravStr extends Traversor {
         trav.args = this.args
         trav.lang = this.lang
         trav.textHandler = this.textHandler
-        trav.getID = this.getID
+        trav.getIDMethod = this.getIDMethod
         return trav.plainText()
     }
     public plainText(): string {
         const id = this.getID(this.baseID, this.str)
         if (this.re.test(this.str)) {
-            TRAVERSE_DICT[id] = this.str
+            TRAV_RESULT_DICT[id] = this.str
             if (this.textHandler) {
                 return this.textHandler(this.str, id, ...this.args)
             }

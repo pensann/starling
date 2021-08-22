@@ -2,13 +2,14 @@ import { parseJSON } from "../parser";
 import { TravEntries } from "./trav-entries";
 import { join, resolve, extname } from "path";
 import { buildTarget } from "../builder";
-import { Traversor, TRAVERSE_DICT } from "../traversor";
+import { Traversor } from "../traversor";
 import { Target, TargetType } from "./target";
 import { Starlog } from "../log";
 import { existsSync } from "fs";
 
 export class TravFiles extends Traversor {
     private readonly modFolder: string
+    public targetFolder: string = ""
     constructor(modfolder: string) {
         super()
         this.modFolder = resolve(modfolder)
@@ -27,7 +28,7 @@ export class TravFiles extends Traversor {
             return str
         })()
     }
-    public traverse(fileRelPath: string): DictKV {
+    public traverse(fileRelPath: string): void {
         const content = parseJSON(join(this.modFolder, fileRelPath)) as CommonContent
         const changeList = []
         Starlog.info(`Traversing file: ${fileRelPath}`)
@@ -95,9 +96,11 @@ export class TravFiles extends Traversor {
         content["Changes"] = changeList
         if (this.textHandler) {
             buildTarget(
-                join(this.modFolder, fileRelPath),
+                join(
+                    this.targetFolder ? this.targetFolder : this.modFolder,
+                    fileRelPath
+                ),
                 JSON.stringify(content, undefined, 4))
         }
-        return TRAVERSE_DICT
     }
 }
