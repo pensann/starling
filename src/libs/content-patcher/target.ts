@@ -1,5 +1,4 @@
 import { basename } from "path";
-import { Starlog } from "../log";
 
 // Entries为数据列表，但可能需要单独处理
 const regexp_movies_reactions = /Data(\/|\\\\)MoviesReactions/i

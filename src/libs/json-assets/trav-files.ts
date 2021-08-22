@@ -1,6 +1,5 @@
 import { extname, join, relative, resolve } from "path"
 import { buildTarget } from "../builder"
-import { Starlog } from "../log"
 import { parseJSON } from "../parser"
 import { Lang, travel, Traversor, TRAV_RESULT_DICT } from "../traversor"
 
