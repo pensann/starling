@@ -37,8 +37,8 @@ describe("trav-str.ts testing", () => {
         const trav = new TravStr("/speak someone \"aloha\"", "baseID")
         trav.emptyDict()
         trav.getIDMethod = (s) => s
-        trav.textHandler = (_) => "hiya!"
-        expect("/speak someone \"hiya!\"").toEqual(trav.eventsLike())
+        trav.textHandler = (_) => "hiya\""
+        expect("/speak someone \"hiya'\"").toEqual(trav.eventsLike())
         expect({ "baseID.0": "aloha" }).toStrictEqual(TRAV_RESULT_DICT)
     })
     it("traverse npc gift tastes text, extract text only", () => {

@@ -4,7 +4,7 @@
  */
 
 import { Starlog } from "../log";
-import { Traversor ,TRAV_RESULT_DICT} from "../traversor";
+import { Traversor, TRAV_RESULT_DICT } from "../traversor";
 
 export class TravStr extends Traversor {
     public readonly str: string
@@ -12,21 +12,25 @@ export class TravStr extends Traversor {
         super(baseID)
         this.str = str
     }
-    private traverse(value: string, id: string): string {
+    private traverse(value: string, id: string, returnEventStr = false): string {
         const trav = new TravStr(value, id)
         trav.args = this.args
         trav.lang = this.lang
         trav.textHandler = this.textHandler
         trav.getIDMethod = this.getIDMethod
-        return trav.plainText()
+        if (returnEventStr) {
+            return trav.plainText().replaceAll(/"/g, "'")
+        } else {
+            return trav.plainText()
+        }
     }
     public plainText(): string {
         const id = this.getID(this.baseID, this.str)
         if (this.re.test(this.str)) {
             TRAV_RESULT_DICT[id] = this.str
-            if (this.textHandler) {
-                return this.textHandler(this.str, id, ...this.args)
-            }
+        }
+        if (this.str && this.textHandler) {
+            return this.textHandler(this.str, id, ...this.args)
         }
         return this.str
     }
@@ -44,7 +48,12 @@ export class TravStr extends Traversor {
             let index = -1
             return this.str.replace(/\".*?\"/g, (s) => {
                 index++
-                return "\"" + this.traverse(s.substring(1, s.length - 1), this.baseID + "." + index) + "\""
+                return "\""
+                    + this.traverse(
+                        s.substring(1, s.length - 1),
+                        this.baseID + "." + index,
+                        true // 注意，这里调用traverse方法时注明了需要返回EventsStr。
+                    ) + "\""
             })
         }
     }

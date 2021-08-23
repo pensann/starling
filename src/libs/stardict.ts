@@ -132,7 +132,19 @@ export function loadProject(path: string): DictKV {
     }
     for (const [key, value] of Object.entries(mainFileContent)) {
         if (value.alterFile) {
-            Object.assign(mainFileContent[key], { "alter": [parseXML(join(path, value.alterFile))["alter"]] })
+            const alterFromXML = parseXML(join(resolve(path), value.alterFile))["alter"]
+            if (!alterFromXML) {
+                Starlog.error("文件未翻译:" + value.alterFile)
+            } else {
+                if (alterFromXML) {
+                    const origin = new StardewStr(value.origin)
+                    const alter = new StardewStr(alterFromXML)
+                    if (origin.trait != alter.trait) {
+                        Starlog.warnning("翻译不正确:" + value.alterFile)
+                    }
+                }
+            }
+            Object.assign(mainFileContent[key], { "alter": [alterFromXML] })
             mainFileContent[key].alterFile = undefined
         }
     }

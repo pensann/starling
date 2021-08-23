@@ -1,6 +1,5 @@
 import { existsSync, rmdirSync } from "fs";
 import { basename, join } from "path";
-import { buildTarget } from "./builder";
 import { cpConvertToi18n, cpi18nTranslate } from "./content-patcher/tools";
 import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { jaTranslate } from "./json-assets/tools";
@@ -60,8 +59,6 @@ export class Translator {
                 trav.lang = mod.Translation.Lang
                 trav.traverse("content.json")
 
-                buildTarget("res/dicten.json",JSON.stringify(dictOri))
-                buildTarget("res/dictzh.json",JSON.stringify(TRAV_RESULT_DICT))
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
             } else if (mod.Type = "JA") {
                 const dictOri: DictKV = {}
