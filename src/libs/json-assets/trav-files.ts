@@ -14,11 +14,9 @@ const keywords = {
 }
 
 export class TravFiles extends Traversor {
-    private readonly modFolder: string
-    public targetFolder: string = ""
     constructor(modfolder: string) {
         super()
-        this.modFolder = resolve(modfolder)
+        this.modFolder = modfolder
     }
     /** extract text only */
     public traverse(): void {

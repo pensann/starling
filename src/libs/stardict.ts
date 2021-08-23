@@ -62,37 +62,36 @@ class StarDict {
             const filePath = join(resolve(path), "src", fnameCount.toString() + ".xml")
             const filePathRel = join("src", fnameCount.toString() + ".xml")
             mainFileContent[entryCount] = { origin: origin.str }
-            if (
-                origin.containsText
-                && (
+            if (origin.containsText) {
+                if (
                     origin.trait != alter.trait
                     || !alter.str
-                )
-            ) {
-                Starlog.warnning("特征不匹配:\n" + origin.str + "\n" + alter.str)
-                buildTarget(filePath, this.convertToXMLStr(
-                    {
-                        origin: origin.strBeauty,
-                        alter: alter.strBeauty,
-                    }, 2, { trait: origin.trait }))
-                mainFileContent[entryCount]["alterFile"] = filePathRel
-                fnameCount++
-            }
-            else {
-                const strOriginLi = origin.strBeauty.split("\n")
-                const strAlterLi = alter.strBeauty.split("\n")
-                let str = ""
-                for (let index = 0; index < strOriginLi.length; index++) {
-                    str = str.concat(
-                        "\n//",
-                        strOriginLi[index],
-                        "\n",
-                        strAlterLi[index]
-                    )
+                ) {
+                    Starlog.warnning("特征不匹配:\n" + origin.str + "\n" + alter.str)
+                    buildTarget(filePath, this.convertToXMLStr(
+                        {
+                            origin: origin.strBeauty,
+                            alter: alter.strBeauty,
+                        }, 2, { trait: origin.trait }))
+                    mainFileContent[entryCount]["alterFile"] = filePathRel
+                    fnameCount++
                 }
-                alterFileContent[entryCount] = str
+                else {
+                    const strOriginLi = origin.strBeauty.split("\n")
+                    const strAlterLi = alter.strBeauty.split("\n")
+                    let str = ""
+                    for (let index = 0; index < strOriginLi.length; index++) {
+                        str = str.concat(
+                            "\n//",
+                            strOriginLi[index],
+                            "\n",
+                            strAlterLi[index]
+                        )
+                    }
+                    alterFileContent[entryCount] = str
+                }
+                entryCount++
             }
-            entryCount++
         }
         // 润色文件
         buildTarget(alterFile, this.convertToXMLStr(alterFileContent).replace(/\n\s*\n/gm, "\n"))

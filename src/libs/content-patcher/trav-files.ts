@@ -8,11 +8,9 @@ import { Starlog } from "../log";
 import { existsSync } from "fs";
 
 export class TravFiles extends Traversor {
-    private readonly modFolder: string
-    public targetFolder: string = ""
     constructor(modfolder: string) {
         super()
-        this.modFolder = resolve(modfolder)
+        this.modFolder = modfolder
     }
     private getChangeID(change: CommonFields): string {
         return change.Target + (() => {
@@ -30,9 +28,9 @@ export class TravFiles extends Traversor {
         })()
     }
     public traverse(fileRelPath: string): void {
+        Starlog.info(`Traversing file: ${join(this.modFolder, fileRelPath)}`)
         const content = parseJSON(join(this.modFolder, fileRelPath)) as CommonContent
         const changeList = []
-        Starlog.info(`Traversing file: ${fileRelPath}`)
         for (let index = 0; index < content.Changes.length; index++) {
             const changeUnknownType = content.Changes[index] as BaseChange
             const percent = String(index * 100 / content.Changes.length).slice(0, 4) + "%"
@@ -98,6 +96,7 @@ export class TravFiles extends Traversor {
                 changeList.push(changeUnknownType)
             }
         }
+        console.log("")
         content["Changes"] = changeList
         if (this.textHandler) {
             buildTarget(

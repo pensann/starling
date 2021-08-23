@@ -3,9 +3,22 @@ import { Lang, TRAV_RESULT_DICT } from "./libs/traversor";
 import { cpConvertToi18n, cpi18nTranslate } from "./libs/content-patcher/tools";
 import { jaTranslate } from "./libs/json-assets/tools";
 import { Translator } from "./libs/translator";
+import { parseJSON } from "./libs/parser";
+import { mergeDict } from "./libs/stardict";
 
 const translator = new Translator("doc/translator.json")
-translator.buildProject()
+// translator.buildProject()
+
+const dicten = parseJSON("res/dicten.json")
+const dictzh = parseJSON("res/dictzh.json")
+
+
+mergeDict(dicten, dictzh).toTranslationProject("res/test")
+
+
+
+
+// translator.translate()
 // let src, dist
 // src = "res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded"
 // dist = "res/SVE/SVE1.13.11-i18n/Stardew Valley Expanded/[CP] Stardew Valley Expanded"

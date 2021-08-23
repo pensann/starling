@@ -27,7 +27,7 @@ class StardewStr {
         this.str = str.replaceAll(/\n\s*/g, "")
     }
     public get containsText() {
-        return /a-zA-Z/.test(
+        return /[a-zA-Z]/.test(
             this.strCompressed
                 .replaceAll(
                     /\$(k|h|s|u|l|a)/gm,

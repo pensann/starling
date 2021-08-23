@@ -13,6 +13,8 @@ export enum Lang {
 }
 
 export class Traversor {
+    public modFolder: string = "."
+    public targetFolder: string = "."
     public readonly emptyDict = () => {
         for (const key in TRAV_RESULT_DICT) {
             delete TRAV_RESULT_DICT[key]
