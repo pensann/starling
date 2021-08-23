@@ -4,7 +4,7 @@ import { buildTarget } from "../builder";
 import { join } from "path";
 import { Starlog } from "../log";
 import { parseJSON } from "../parser";
-import { Lang, REPEATED_ID_LIST } from "../traversor";
+import { Lang, REPEATED_ID_LIST, TRAV_RESULT_DICT } from "../traversor";
 
 export function cpConvertToi18n(src: string, dist: string) {
     rmDir(dist)
@@ -16,9 +16,9 @@ export function cpConvertToi18n(src: string, dist: string) {
     trav.traverse("content.json")
     buildTarget(
         join(dist, "i18n", "default.json"),
-        JSON.stringify(TravFiles.dict, undefined, 4)
+        JSON.stringify(TRAV_RESULT_DICT, undefined, 4)
     )
-    if (TravFiles.dict) {
+    if (TRAV_RESULT_DICT) {
         Starlog.warnning(`以下${REPEATED_ID_LIST.length}个ID重复`, REPEATED_ID_LIST)
     }
 }

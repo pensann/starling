@@ -1,5 +1,6 @@
-import { extname, join, relative, resolve } from "path"
+import { basename, extname, join, relative, resolve } from "path"
 import { buildTarget } from "../builder"
+import { Starlog } from "../log"
 import { parseJSON } from "../parser"
 import { Lang, travel, Traversor, TRAV_RESULT_DICT } from "../traversor"
 
@@ -22,7 +23,10 @@ export class TravFiles extends Traversor {
     /** extract text only */
     public traverse(): void {
         travel(this.modFolder, (file, from) => {
-            if (extname(file) == ".json") {
+            if (
+                extname(file) == ".json"
+                && basename(file) != "manifest.json"
+            ) {
                 const targetFile = join(this.targetFolder, relative(from, file))
                 const content: JsonAssets = parseJSON(file)
                 for (const [key, text] of Object.entries(content)) {
@@ -39,8 +43,10 @@ export class TravFiles extends Traversor {
                                     return locale[this.lang]
                                 }
                             })()
-                            if (textLoc && this.re.test(textLoc)) {
-                                // 提取文本
+                            // 提取文本
+                            if (this.lang == Lang.default) {
+                                TRAV_RESULT_DICT[text] = text
+                            } else if (textLoc && this.re.test(textLoc)) {
                                 TRAV_RESULT_DICT[text] = textLoc
                                 // 使用textHandler处理文本
                             }

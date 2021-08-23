@@ -15,7 +15,8 @@ export class TravFiles extends Traversor {
         this.modFolder = resolve(modfolder)
     }
     private getChangeID(change: CommonFields): string {
-        return change.Action + change.Target + (() => {
+        return change.Target + (() => {
+            // return change.Action + change.Target + (() => {
             let str = ""
             if (change.When) {
                 str += "[When]"
@@ -35,7 +36,7 @@ export class TravFiles extends Traversor {
         for (let index = 0; index < content.Changes.length; index++) {
             const changeUnknownType = content.Changes[index] as BaseChange
             const percent = String(index * 100 / content.Changes.length).slice(0, 4) + "%"
-            Starlog.infoOneLine(`Traversing change ${percent}`)
+            Starlog.infoOneLine(`Loading change ${percent}`)
             if (changeUnknownType.Action == "Include") {
                 const change = changeUnknownType as Include
                 change.FromFile.split(/\s*,\s*/).forEach((file) => {
