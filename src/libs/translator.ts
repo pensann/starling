@@ -1,5 +1,5 @@
+import { existsSync, rmdirSync } from "fs";
 import { join } from "path";
-import { buildTarget } from "./builder";
 import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { TravFiles as TravJA } from "./json-assets/trav-files";
 import { Starlog } from "./log";
@@ -32,6 +32,11 @@ export class Translator {
     }
     public buildProject() {
         this.config.Mods.forEach((mod) => {
+            const projectFolder = join(
+                this.config.src,
+                mod.Translation.Project
+            )
+            if (existsSync(projectFolder)) { rmdirSync(projectFolder) }
             if (mod.Type == "CP") {
                 const dictOri: DictKV = {}
                 const dictAlter: DictKV = {}
@@ -55,13 +60,7 @@ export class Translator {
                 trav.traverse("content.json")
                 Object.assign(dictAlter2, TRAV_RESULT_DICT)
 
-                buildTarget("res/test.json", JSON.stringify(mergeDict(dictOri, dictAlter, dictAlter2), undefined, 2))
-                mergeDict(dictOri, dictAlter, dictAlter2).toTranslationProject(
-                    join(
-                        this.config.src,
-                        mod.Translation.Project
-                    )
-                )
+                mergeDict(dictOri, dictAlter, dictAlter2).toTranslationProject(projectFolder)
             } else if (mod.Type = "JA") {
                 const dictOri: DictKV = {}
                 const dictAlter: DictKV = {}
@@ -83,13 +82,7 @@ export class Translator {
                 trav.lang = mod.Translation.Lang
                 trav.traverse()
                 Object.assign(dictAlter2, TRAV_RESULT_DICT)
-
-                mergeDict(dictOri, dictAlter, dictAlter2).toTranslationProject(
-                    join(
-                        this.config.src,
-                        mod.Translation.Project
-                    )
-                )
+                mergeDict(dictOri, dictAlter, dictAlter2).toTranslationProject(projectFolder)
             }
         })
     }

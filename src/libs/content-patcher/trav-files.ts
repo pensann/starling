@@ -56,8 +56,8 @@ export class TravFiles extends Traversor {
                 // TODO 支持Field等其它字段翻译
             } else if (changeUnknownType.Action == "Load") {
                 const change = changeUnknownType as Load
-                // 首先记住这个load文件
-                changeList.push(change)
+                // LoadConverted
+                let loadConverted = false
                 // 然后开始Edit 
                 // load的Target可能为多个,仅处理json文件
                 const targetList = change.Target.split(/\s*,\s*/)
@@ -74,6 +74,7 @@ export class TravFiles extends Traversor {
                             const trav = new TravEntries(target.str, entries, this.getChangeID(change))
                             trav.lang = this.lang
                             if (this.textHandler) {
+                                loadConverted = true
                                 // 需要翻译的话，需要把文件转换为EditData后应用
                                 const i18nFile = join(this.modFolder, "i18n", this.lang + "json")
                                 trav.textHandler = this.textHandler
@@ -89,6 +90,9 @@ export class TravFiles extends Traversor {
                             }
                         }
                     })
+                }
+                if (!loadConverted) {
+                    changeList.push(change)
                 }
             } else {
                 changeList.push(changeUnknownType)

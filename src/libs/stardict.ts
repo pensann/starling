@@ -63,8 +63,11 @@ class StarDict {
             const filePathRel = join("src", fnameCount.toString() + ".xml")
             mainFileContent[entryCount] = { origin: origin.str }
             if (
-                origin.trait != alter.trait
-                || !alter.str
+                origin.containsText
+                && (
+                    origin.trait != alter.trait
+                    || !alter.str
+                )
             ) {
                 Starlog.warnning("特征不匹配:\n" + origin.str + "\n" + alter.str)
                 buildTarget(filePath, this.convertToXMLStr(

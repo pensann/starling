@@ -26,6 +26,16 @@ class StardewStr {
     public fromString(str: string) {
         this.str = str.replaceAll(/\n\s*/g, "")
     }
+    public get containsText() {
+        return /a-zA-Z/.test(
+            this.strCompressed
+                .replaceAll(
+                    /\$(k|h|s|u|l|a)/gm,
+                    str => { return this.portrait_alias[str] }
+                )
+                .replaceAll(this.traitRgexp, "")
+        )
+    }
     private portrait_alias = {
         "$k": "$0",
         "$h": "$1",
