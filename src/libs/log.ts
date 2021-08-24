@@ -14,6 +14,6 @@ export class Starlog {
 
     }
     public static infoOneLine(...args: any) {
-        stdout("[\x1B[38;5;44mINFO\x1B[0m] " + args + "\n")
+        stdout("[\x1B[38;5;44mINFO\x1B[0m] " + args)
     }
 }

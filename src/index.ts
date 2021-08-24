@@ -1,6 +1,15 @@
 import { Translator } from "./libs/translator";
 
-const translator = new Translator("doc/translator.json")
-// translator.buildProject()
-translator.translate()
+let translator
 
+const transLi = [
+    // "res/SVE/translator.json",
+    // "res/RSV/translator.json"
+    "res/MNF/translator.json"
+]
+
+transLi.forEach(s => {
+    translator = new Translator(s)
+    translator.buildProject()
+    // translator.translate()
+})

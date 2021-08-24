@@ -1,11 +1,11 @@
 import { parseJSON } from "../parser";
 import { TravEntries } from "./trav-entries";
-import { join, resolve, extname } from "path";
+import { join, extname } from "path";
 import { buildTarget } from "../builder";
-import { Traversor } from "../traversor";
+import { Traversor, TRAV_RESULT_DICT } from "../traversor";
 import { Target, TargetType } from "./target";
 import { Starlog } from "../log";
-import { existsSync } from "fs";
+import { existsSync, lstatSync } from "fs";
 
 export class TravFiles extends Traversor {
     constructor(modfolder: string) {
@@ -27,72 +27,108 @@ export class TravFiles extends Traversor {
             return str
         })()
     }
+    public traverseSafe(fileRelPath: string) {
+        const i18nFolder = join(this.modFolder, "i18n")
+        const stats = lstatSync(i18nFolder)
+        if (stats.isDirectory()) {
+            // 写i18n模组的遍历逻辑
+            Object.assign(TRAV_RESULT_DICT, parseJSON(join(i18nFolder, this.lang + ".json")))
+            if (this.textHandler) {
+                buildTarget(join(this.targetFolder, "i18n", this.lang + ".json"), "{}")
+            }
+        } else {
+            this.traverse(fileRelPath)
+        }
+    }
     public traverse(fileRelPath: string): void {
         Starlog.info(`Traversing file: ${join(this.modFolder, fileRelPath)}`)
         const content = parseJSON(join(this.modFolder, fileRelPath)) as CommonContent
         const changeList = []
+        let loadEdited = false
         for (let index = 0; index < content.Changes.length; index++) {
-            const changeUnknownType = content.Changes[index] as BaseChange
+            const changeUnknownType: {
+                Action: BaseChange["Action"]
+                [index: string]: undefined | any
+            } = content.Changes[index]
             const percent = String(index * 100 / content.Changes.length).slice(0, 4) + "%"
             Starlog.infoOneLine(`Loading change ${percent}`)
-            if (changeUnknownType.Action == "Include") {
-                const change = changeUnknownType as Include
-                change.FromFile.split(/\s*,\s*/).forEach((file) => {
-                    this.traverse(file)
-                })
-            } else if (changeUnknownType.Action == "EditData") {
-                const change = changeUnknownType as EditData
-                if (change.Entries) {
-                    const trav = new TravEntries(change.Target, change.Entries, this.getChangeID(change))
-                    const i18nFile = join(this.modFolder, "i18n", this.lang + ".json")
-                    trav.lang = this.lang
-                    trav.textHandler = this.textHandler
-                    if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
-                    change.Entries = trav.traverse()
-                }
-                changeList.push(change)
-                // TODO 支持Field等其它字段翻译
-            } else if (changeUnknownType.Action == "Load") {
-                const change = changeUnknownType as Load
-                // 出于对兼容性的考虑，保留全部Load文件入口，并追加EditData补丁
-                changeList.push(change)
-                // 然后开始Edit 
-                // load的Target可能为多个,仅处理json文件
-                const targetList = change.Target.split(/\s*,\s*/)
-                if (extname(change.FromFile) == ".json") {
-                    targetList.forEach((targetStr) => {
-                        const target = new Target(targetStr)
-                        if (
-                            target.type == TargetType.PlainText
-                            || target.type == TargetType.EventsLike
-                            || target.type == TargetType.Festivals
-                        ) {
-                            const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
-                            const entries = parseJSON(join(this.modFolder, file))
-                            const trav = new TravEntries(target.str, entries, this.getChangeID(change))
-                            trav.lang = this.lang
-                            if (this.textHandler) {
-                                // 生成伪Load文件(用于注册)
-                                buildTarget(join(this.targetFolder, file), "{}")
-                                // 使用EditData
-                                const i18nFile = join(this.modFolder, "i18n", this.lang + "json")
-                                trav.textHandler = this.textHandler
-                                if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
-                                const changeNew: EditData = {
-                                    Action: "EditData",
-                                    Target: target.str,
-                                    Entries: trav.traverse()
-                                }
-                                changeList.push(changeNew)
-                            } else {
-                                trav.traverse()
-                            }
-                        }
+            if (
+                !changeUnknownType["When"] // 不包含When默认提取
+                || (
+                    changeUnknownType["When"] //包含When并且Language正确
+                    && changeUnknownType["When"]["Language"] == this.lang
+                )
+            ) {
+                if (changeUnknownType.Action == "Include") {
+                    const change = changeUnknownType as Include
+                    change.FromFile.split(/\s*,\s*/).forEach((file) => {
+                        this.traverse(file)
                     })
+                } else if (changeUnknownType.Action == "EditData") {
+                    const change = changeUnknownType as EditData
+                    if (change.Entries) {
+                        const trav = new TravEntries(change.Target, change.Entries, this.getChangeID(change))
+                        const i18nFile = join(this.modFolder, "i18n", this.lang + ".json")
+                        trav.lang = this.lang
+                        trav.textHandler = this.textHandler
+                        if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
+                        change.Entries = trav.traverse()
+                    }
+                    changeList.push(change)
+                    // TODO 支持Field等其它字段翻译
+                } else if (changeUnknownType.Action == "Load") {
+                    const change = changeUnknownType as Load
+                    if (extname(change.FromFile) == ".json") {
+                        const targetList = change.Target.split(/\s*,\s*/)
+                        const editDataListNew: EditData[] = []
+                        targetList.forEach((targetStr) => {
+                            // 遍历器用到的假entries文件
+                            const target = new Target(targetStr)
+                            if (
+                                target.type == TargetType.PlainText
+                                || target.type == TargetType.EventsLike
+                                || target.type == TargetType.Festivals
+                            ) {
+                                const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
+                                const entries = parseJSON(join(this.modFolder, file))
+                                const trav = new TravEntries(target.str, entries, this.getChangeID(change))
+                                trav.lang = this.lang
+                                if (!this.textHandler) {
+                                    // 不处理文本的话，直接遍历
+                                    trav.traverse()
+                                } else {
+                                    // 处理文本
+                                    loadEdited = true
+                                    const i18nFile = join(this.modFolder, "i18n", this.lang + "json")
+
+                                    // 设置遍历器
+                                    trav.textHandler = this.textHandler
+                                    if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
+
+                                    // 保存遍历结果
+                                    editDataListNew.push({
+                                        Action: "EditData",
+                                        Target: target.str,
+                                        Entries: trav.traverse()
+                                    } as EditData)
+                                }
+                            }
+                        })
+                        if (loadEdited) {
+                            change.FromFile = "empty.json"
+                        }
+                        changeList.push(change, ...editDataListNew)
+                    } else {
+                        changeList.push(change)
+                    }
+                } else {
+                    changeList.push(changeUnknownType)
                 }
-            } else {
-                changeList.push(changeUnknownType)
             }
+        }
+        if (loadEdited) {
+            const fakeFile = join(this.targetFolder, "assets", "empty.json")
+            buildTarget(fakeFile, "{}")
         }
         console.log("")
         content["Changes"] = changeList

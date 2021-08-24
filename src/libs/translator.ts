@@ -1,5 +1,6 @@
+import { exec } from "child_process";
 import { existsSync, rmdirSync } from "fs";
-import { basename, join } from "path";
+import { basename, join, resolve } from "path";
 import { cpConvertToi18n, cpi18nTranslate } from "./content-patcher/tools";
 import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { jaTranslate } from "./json-assets/tools";
@@ -38,10 +39,16 @@ export class Translator {
                 this.config.src,
                 mod.Translation.Project
             )
+            this.checkEmpty(projectFolder)
+        })
+        this.config.Mods.forEach((mod) => {
+            const projectFolder = join(
+                this.config.src,
+                mod.Translation.Project
+            )
+            this.checkEmpty(projectFolder)
             const src = join(this.config.src, mod.Path)
             const from = join(this.config.src, mod.Translation.From)
-
-            if (existsSync(projectFolder)) { rmdirSync(projectFolder) }
             if (mod.Type == "CP") {
                 const dictOri: DictKV = {}
 
@@ -72,7 +79,6 @@ export class Translator {
                 trav.modFolder = from
                 trav.lang = mod.Translation.Lang
                 trav.traverse()
-                Starlog.debug(TRAV_RESULT_DICT)
 
                 // 优先考虑本版本的汉化
                 trav.modFolder = src
@@ -82,7 +88,8 @@ export class Translator {
             }
         })
     }
-    public translate() {
+    public translate(zip = false) {
+        this.checkEmpty(this.config.dist)
         this.config.Mods.forEach((mod) => {
             const projectFolder = join(
                 this.config.src,
@@ -98,5 +105,23 @@ export class Translator {
                 jaTranslate(src, dist, dict, Lang.zh)
             }
         })
+        const cmd =
+            `cd '${resolve(this.config.dist)}'`
+            + " && zip -q -r -9"
+            + ` '${this.config.Name}.zip' *`
+            + " -x '*.DS_Store'"
+            + " && open ."
+        console.log(cmd)
+        if (zip) {
+            exec(cmd)
+            Starlog.info("正在制作压缩包...")
+        }
+    }
+    private checkEmpty(dir: string) {
+        try {
+            if (existsSync(dir)) { rmdirSync(dir) }
+        } catch (error) {
+            throw new Error(`${dir} not empty`);
+        }
     }
 }
