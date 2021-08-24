@@ -9,7 +9,7 @@ import { Lang, REPEATED_ID_LIST, TRAV_RESULT_DICT } from "../traversor";
 export function cpConvertToi18n(src: string, dist: string) {
     rmDir(dist)
     const trav = new TravFiles(src)
-    trav.targetFolder = dist
+    trav.dist = dist
     trav.textHandler = (_, id) => {
         return `{{i18n:${id}}}`
     }

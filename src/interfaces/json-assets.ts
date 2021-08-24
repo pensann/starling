@@ -1,3 +1,4 @@
+// -- file --
 interface JsonAssets {
     // Common
     Name: string

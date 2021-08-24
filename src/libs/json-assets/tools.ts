@@ -9,6 +9,6 @@ export function jaTranslate(jaPath: string, dist: string, dict: DictKV, lang: La
     const trav = new TravFiles(jaPath)
     trav.textHandler = translator
     trav.lang = lang
-    trav.targetFolder = dist
+    trav.dist = dist
     trav.traverse()
 }

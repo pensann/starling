@@ -16,16 +16,16 @@ const keywords = {
 export class TravFiles extends Traversor {
     constructor(modfolder: string) {
         super()
-        this.modFolder = modfolder
+        this.src = modfolder
     }
     /** extract text only */
     public traverse(): void {
-        travel(this.modFolder, (file, from) => {
+        travel(this.src, (file, from) => {
             if (
                 extname(file) == ".json"
                 && basename(file) != "manifest.json"
             ) {
-                const targetFile = join(this.targetFolder, relative(from, file))
+                const targetFile = join(this.dist, relative(from, file))
                 const content: JsonAssets = parseJSON(file)
                 for (const [key, text] of Object.entries(content)) {
                     for (const [keyStr, LocKeyStr] of Object.entries(keywords)) {

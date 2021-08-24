@@ -5,12 +5,12 @@ import { buildTarget } from "../builder";
 import { Traversor, TRAV_RESULT_DICT } from "../traversor";
 import { Target, TargetType } from "./target";
 import { Starlog } from "../log";
-import { existsSync, lstatSync } from "fs";
+import { existsSync, statSync } from "fs";
 
 export class TravFiles extends Traversor {
     constructor(modfolder: string) {
         super()
-        this.modFolder = modfolder
+        this.src = modfolder
     }
     private getChangeID(change: CommonFields): string {
         return change.Target + (() => {
@@ -28,21 +28,20 @@ export class TravFiles extends Traversor {
         })()
     }
     public traverseSafe(fileRelPath: string) {
-        const i18nFolder = join(this.modFolder, "i18n")
-        const stats = lstatSync(i18nFolder)
-        if (stats.isDirectory()) {
+        const i18nFolder = join(this.src, "i18n")
+        if (statSync(i18nFolder).isDirectory()) {
             // 写i18n模组的遍历逻辑
             Object.assign(TRAV_RESULT_DICT, parseJSON(join(i18nFolder, this.lang + ".json")))
             if (this.textHandler) {
-                buildTarget(join(this.targetFolder, "i18n", this.lang + ".json"), "{}")
+                buildTarget(join(this.dist, "i18n", this.lang + ".json"), "{}")
             }
         } else {
             this.traverse(fileRelPath)
         }
     }
     public traverse(fileRelPath: string): void {
-        Starlog.info(`Traversing file: ${join(this.modFolder, fileRelPath)}`)
-        const content = parseJSON(join(this.modFolder, fileRelPath)) as CommonContent
+        Starlog.info(`Traversing file: ${join(this.src, fileRelPath)}`)
+        const content = parseJSON(join(this.src, fileRelPath)) as CommonContent
         const changeList = []
         let loadEdited = false
         for (let index = 0; index < content.Changes.length; index++) {
@@ -68,7 +67,7 @@ export class TravFiles extends Traversor {
                     const change = changeUnknownType as EditData
                     if (change.Entries) {
                         const trav = new TravEntries(change.Target, change.Entries, this.getChangeID(change))
-                        const i18nFile = join(this.modFolder, "i18n", this.lang + ".json")
+                        const i18nFile = join(this.src, "i18n", this.lang + ".json")
                         trav.lang = this.lang
                         trav.textHandler = this.textHandler
                         if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
@@ -90,7 +89,7 @@ export class TravFiles extends Traversor {
                                 || target.type == TargetType.Festivals
                             ) {
                                 const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
-                                const entries = parseJSON(join(this.modFolder, file))
+                                const entries = parseJSON(join(this.src, file))
                                 const trav = new TravEntries(target.str, entries, this.getChangeID(change))
                                 trav.lang = this.lang
                                 if (!this.textHandler) {
@@ -99,7 +98,7 @@ export class TravFiles extends Traversor {
                                 } else {
                                     // 处理文本
                                     loadEdited = true
-                                    const i18nFile = join(this.modFolder, "i18n", this.lang + "json")
+                                    const i18nFile = join(this.src, "i18n", this.lang + "json")
 
                                     // 设置遍历器
                                     trav.textHandler = this.textHandler
@@ -127,7 +126,7 @@ export class TravFiles extends Traversor {
             }
         }
         if (loadEdited) {
-            const fakeFile = join(this.targetFolder, "assets", "empty.json")
+            const fakeFile = join(this.dist, "empty.json")
             buildTarget(fakeFile, "{}")
         }
         console.log("")
@@ -135,7 +134,7 @@ export class TravFiles extends Traversor {
         if (this.textHandler) {
             buildTarget(
                 join(
-                    this.targetFolder ? this.targetFolder : this.modFolder,
+                    this.dist ? this.dist : this.src,
                     fileRelPath
                 ),
                 JSON.stringify(content, undefined, 4))

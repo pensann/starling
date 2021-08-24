@@ -20,7 +20,7 @@ export class TravEntries extends Traversor {
         }
         return value
     }
-    private travStr(str: string, baseID: string): TravStr {
+    private textTrav(str: string, baseID: string): TravStr {
         const trav = new TravStr(str, baseID)
         trav.textHandler = this.textHandler
         trav.args = this.args
@@ -35,11 +35,11 @@ export class TravEntries extends Traversor {
             if (value) {
                 if (this.target.type == TargetType.PlainText) {
                     result[key] = this
-                        .travStr(this.load(value), this.baseID + key)
+                        .textTrav(this.load(value), this.baseID + key)
                         .plainText()
                 } else if (this.target.type == TargetType.EventsLike) {
                     result[key] = this
-                        .travStr(this.load(value), this.baseID + key)
+                        .textTrav(this.load(value), this.baseID + key)
                         .eventsLike()
                 } else if (this.target.type == TargetType.Festivals) {
                     if (key == "set-up") {
@@ -47,11 +47,11 @@ export class TravEntries extends Traversor {
                     }
                     else if (/"\s*\//.test(value)) {
                         result[key] = this
-                            .travStr(this.load(value), this.baseID + key)
+                            .textTrav(this.load(value), this.baseID + key)
                             .eventsLike()
                     } else {
                         result[key] = this
-                            .travStr(this.load(value), this.baseID + key)
+                            .textTrav(this.load(value), this.baseID + key)
                             .plainText()
                     }
                 } else if (this.target.type == TargetType.MoviesReactions) {
@@ -64,14 +64,14 @@ export class TravEntries extends Traversor {
                                     // 处理字符串
                                     valueSPR.Script = this.load(valueSPR.Script)
                                     valueObject["Reactions"][index]["SpecialResponses"]![keySPR]["Script"] = this
-                                        .travStr(valueSPR.Script, this.baseID + key + keySPR + ".Script." + index)
+                                        .textTrav(valueSPR.Script, this.baseID + key + keySPR + ".Script." + index)
                                         .eventsLike()
                                 }
                                 if (valueSPR && valueSPR.Text) {
                                     // 处理字符串
                                     valueSPR.Text = this.load(valueSPR.Text)
                                     valueObject.Reactions[index]["SpecialResponses"]![keySPR]["Text"] = this
-                                        .travStr(valueSPR.Text, this.baseID + key + keySPR + ".Text." + index)
+                                        .textTrav(valueSPR.Text, this.baseID + key + keySPR + ".Text." + index)
                                         .plainText()
                                 }
                                 result[key] = valueObject
@@ -81,11 +81,11 @@ export class TravEntries extends Traversor {
                     })
                 } else if (this.target.type == TargetType.NPCDispositions) {
                     result[key] = this
-                        .travStr(this.load(value), this.baseID + key)
+                        .textTrav(this.load(value), this.baseID + key)
                         .npcDispositions()
                 } else if (this.target.type == TargetType.NPCGiftTastes) {
                     result[key] = this
-                        .travStr(this.load(value), this.baseID + key)
+                        .textTrav(this.load(value), this.baseID + key)
                         .npcGiftTastes()
                 }
             }

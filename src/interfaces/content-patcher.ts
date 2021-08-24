@@ -1,3 +1,9 @@
+// -- file --
+interface CommonContent {
+    Changes: BaseChange[]
+}
+
+// -- data --
 interface BaseChange {
     Action: "Load" | "EditImage" | "EditData" | "EditMap" | "Include",
 }
@@ -87,9 +93,4 @@ interface MoviesReactionValue {
             }
         },
     }[]
-}
-
-/** file */
-interface CommonContent {
-    Changes: BaseChange[]
 }

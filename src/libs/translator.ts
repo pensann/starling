@@ -58,11 +58,11 @@ export class Translator {
                 Object.assign(dictOri, TRAV_RESULT_DICT)
                 trav.emptyDict()
 
-                trav.modFolder = from
+                trav.src = from
                 trav.lang = mod.Translation.Lang
                 trav.traverse("content.json")
 
-                trav.modFolder = src
+                trav.src = src
                 trav.lang = mod.Translation.Lang
                 trav.traverse("content.json")
 
@@ -76,12 +76,12 @@ export class Translator {
                 Object.assign(dictOri, TRAV_RESULT_DICT)
                 trav.emptyDict()
 
-                trav.modFolder = from
+                trav.src = from
                 trav.lang = mod.Translation.Lang
                 trav.traverse()
 
                 // 优先考虑本版本的汉化
-                trav.modFolder = src
+                trav.src = src
                 trav.lang = mod.Translation.Lang
                 trav.traverse()
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
