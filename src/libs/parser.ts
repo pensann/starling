@@ -31,11 +31,13 @@ function parseXMLStr(str: string) {
     const entries: DictKV = {}
     parser.parseString(str, (err: string, res: any) => {
         if (err) throw err
-        res.entries.entry.forEach((entry: any) => {
-            entries[entry.$.id] = entry._ ? entry._
-                .replace(/\n/gm, "")
-                .replace(/^\s*|\s*$/gm, "") : entry._
-        })
+        if (res.entries.entry) {
+            res.entries.entry.forEach((entry: any) => {
+                entries[entry.$.id] = entry._ ? entry._
+                    .replace(/\n/gm, "")
+                    .replace(/^\s*|\s*$/gm, "") : entry._
+            })
+        }
     })
     return entries
 }

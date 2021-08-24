@@ -8,9 +8,9 @@ import { Starlog } from "../log";
 import { existsSync, statSync } from "fs";
 
 export class TravFiles extends Traversor {
-    constructor(modfolder: string) {
+    constructor(src: string) {
         super()
-        this.src = modfolder
+        this.src = src
     }
     private getChangeID(change: CommonFields): string {
         return change.Target + (() => {
@@ -27,21 +27,21 @@ export class TravFiles extends Traversor {
             return str
         })()
     }
-    public traverseSafe(fileRelPath: string) {
-        const i18nFolder = join(this.src, "i18n")
-        if (statSync(i18nFolder).isDirectory()) {
+    public tranverse(fileRelPath: string) {
+        const i18nFile = join(this.src, "i18n", this.lang + ".json")
+        if (existsSync(i18nFile)) {
             // 写i18n模组的遍历逻辑
-            Object.assign(TRAV_RESULT_DICT, parseJSON(join(i18nFolder, this.lang + ".json")))
+            Object.assign(TRAV_RESULT_DICT, parseJSON(i18nFile))
             if (this.textHandler) {
                 buildTarget(join(this.dist, "i18n", this.lang + ".json"), "{}")
             }
         } else {
-            this.traverse(fileRelPath)
+            this.traverseUnsafe(fileRelPath)
         }
     }
-    public traverse(fileRelPath: string): void {
-        Starlog.info(`Traversing file: ${join(this.src, fileRelPath)}`)
-        const content = parseJSON(join(this.src, fileRelPath)) as CommonContent
+    public traverseUnsafe(relPath: string): void {
+        Starlog.info(`Traversing file: ${join(this.src, relPath)}`)
+        const content = parseJSON(join(this.src, relPath)) as CommonContent
         const changeList = []
         let loadEdited = false
         for (let index = 0; index < content.Changes.length; index++) {
@@ -61,7 +61,7 @@ export class TravFiles extends Traversor {
                 if (changeUnknownType.Action == "Include") {
                     const change = changeUnknownType as Include
                     change.FromFile.split(/\s*,\s*/).forEach((file) => {
-                        this.traverse(file)
+                        this.traverseUnsafe(file)
                     })
                 } else if (changeUnknownType.Action == "EditData") {
                     const change = changeUnknownType as EditData
@@ -135,7 +135,7 @@ export class TravFiles extends Traversor {
             buildTarget(
                 join(
                     this.dist ? this.dist : this.src,
-                    fileRelPath
+                    relPath
                 ),
                 JSON.stringify(content, undefined, 4))
         }

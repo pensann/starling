@@ -2,13 +2,16 @@ import { exec } from "child_process";
 import { existsSync, rmdirSync } from "fs";
 import { basename, join, resolve } from "path";
 import { cpConvertToi18n, cpi18nTranslate } from "./content-patcher/tools";
-import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { jaTranslate } from "./json-assets/tools";
-import { TravFiles as TravJA } from "./json-assets/trav-files";
 import { Starlog } from "./log";
 import { parseJSON } from "./parser";
 import { loadProject, mergeDict } from "./stardict";
+
 import { Lang, TRAV_RESULT_DICT } from "./traversor";
+import { TravFiles as TravCP } from "./content-patcher/trav-files";
+import { TravFiles as TravJA } from "./json-assets/trav-files";
+import { TravFiles as TravMFM } from "./mail-framework/trav-files";
+import { mfmTranslate } from "./mail-framework/tools";
 
 interface translatorConfig {
     Name: string
@@ -17,7 +20,7 @@ interface translatorConfig {
     Mods: [
         {
             Path: string,
-            Type: "CP" | "JA"
+            Type: "CP" | "JA" | "MFM"
             Translation: {
                 Lang: Lang
                 Project: string
@@ -46,7 +49,6 @@ export class Translator {
                 this.config.src,
                 mod.Translation.Project
             )
-            this.checkEmpty(projectFolder)
             const src = join(this.config.src, mod.Path)
             const from = join(this.config.src, mod.Translation.From)
             if (mod.Type == "CP") {
@@ -54,23 +56,41 @@ export class Translator {
 
                 const trav = new TravCP(join(this.config.src, mod.Path))
                 trav.emptyDict()
-                trav.traverse("content.json")
+                trav.traverseUnsafe("content.json")
                 Object.assign(dictOri, TRAV_RESULT_DICT)
                 trav.emptyDict()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
-                trav.traverse("content.json")
+                trav.traverseUnsafe("content.json")
 
                 trav.src = src
                 trav.lang = mod.Translation.Lang
-                trav.traverse("content.json")
+                trav.traverseUnsafe("content.json")
 
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
-            } else if (mod.Type = "JA") {
+            } else if (mod.Type == "JA") {
                 const dictOri: DictKV = {}
 
                 const trav = new TravJA(src)
+                trav.emptyDict()
+                trav.traverse()
+                Object.assign(dictOri, TRAV_RESULT_DICT)
+                trav.emptyDict()
+
+                trav.src = from
+                trav.lang = mod.Translation.Lang
+                trav.traverse()
+
+                // 优先考虑本版本的汉化
+                trav.src = src
+                trav.lang = mod.Translation.Lang
+                trav.traverse()
+                mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
+            } else if (mod.Type == "MFM") {
+                const dictOri: DictKV = {}
+
+                const trav = new TravMFM(src)
                 trav.emptyDict()
                 trav.traverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
@@ -103,6 +123,8 @@ export class Translator {
                 cpi18nTranslate(dist, dict, Lang.zh)
             } else if (mod.Type == "JA") {
                 jaTranslate(src, dist, dict, Lang.zh)
+            }else if (mod.Type == "MFM"){
+                mfmTranslate(src, dist, dict, Lang.zh)
             }
         })
         const cmd =

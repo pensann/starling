@@ -13,12 +13,12 @@ export function cpConvertToi18n(src: string, dist: string) {
     trav.textHandler = (_, id) => {
         return `{{i18n:${id}}}`
     }
-    trav.traverse("content.json")
+    trav.traverseUnsafe("content.json")
     buildTarget(
         join(dist, "i18n", "default.json"),
         JSON.stringify(TRAV_RESULT_DICT, undefined, 4)
     )
-    if (TRAV_RESULT_DICT) {
+    if (REPEATED_ID_LIST.length) {
         Starlog.warnning(`以下${REPEATED_ID_LIST.length}个ID重复`, REPEATED_ID_LIST)
     }
 }
