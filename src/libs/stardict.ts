@@ -70,8 +70,8 @@ class StarDict {
                     Starlog.warnning("特征不匹配:\n" + origin.str + "\n" + alter.str)
                     buildTarget(filePath, this.convertToXMLStr(
                         {
-                            origin: origin.strBeauty,
-                            alter: alter.strBeauty,
+                            origin: `// {${origin.trait}}\n` + origin.strBeauty,
+                            alter: `// {${alter.trait}}\n` + alter.strBeauty,
                         }, 2, { trait: origin.trait }))
                     mainFileContent[entryCount]["alterFile"] = filePathRel
                     fnameCount++

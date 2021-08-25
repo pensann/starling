@@ -56,17 +56,26 @@ export class Translator {
 
                 const trav = new TravCP(join(this.config.src, mod.Path))
                 trav.emptyDict()
+
+                // 使用unsafe遍历检查原模组是否存在错误
                 trav.traverseUnsafe("content.json")
+                trav.emptyDict()
+
+
+                // trav.traverseUnsafe("content.json")
+                trav.tranverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
                 trav.emptyDict()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
-                trav.traverseUnsafe("content.json")
+                // trav.traverseUnsafe("content.json")
+                trav.tranverse()
 
                 trav.src = src
                 trav.lang = mod.Translation.Lang
-                trav.traverseUnsafe("content.json")
+                // trav.traverseUnsafe("content.json")
+                trav.tranverse()
 
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
             } else if (mod.Type == "JA") {
@@ -133,7 +142,6 @@ export class Translator {
             + ` '${this.config.Name}.zip' *`
             + " -x '*.DS_Store'"
             + " && open ."
-        console.log(cmd)
         if (zip) {
             exec(cmd)
             Starlog.info("正在制作压缩包...")
@@ -143,7 +151,8 @@ export class Translator {
         try {
             if (existsSync(dir)) { rmdirSync(dir) }
         } catch (error) {
-            throw new Error(`${dir} not empty`);
+            Starlog.warnning(`${dir} not empty`)
+            // throw new Error(`${dir} not empty`);
         }
     }
 }
