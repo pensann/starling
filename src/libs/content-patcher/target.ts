@@ -7,7 +7,6 @@ const regexp_movies_reactions = /Data(\/|\\\\)MoviesReactions/i
 const regexp_dialogue = /Characters(\/|\\\\)Dialogue(\/|\\\\).*/i
 const regexp_engagement_dialogue = /Data(\/|\\\\)EngagementDialogue/i
 const regexp_extra_dialogue = /Data(\/|\\\\)ExtraDialogue/i
-const regexp_mail = /Data(\/|\\\\)Mail/i
 const regexp_special_order_strings = /Strings(\/|\\\\)SpecialOrderStrings/i
 const regexp_speech_bubbles = /Strings(\/|\\\\)SpeechBubbles/i
 const regexp_strings_characters = /Strings(\/|\\\\)Characters/i
@@ -17,6 +16,9 @@ const regexp_strings_locations = /Strings(\/|\\\\)Locations/i
 const regexp_strings_schedules = /Strings(\/|\\\\)Schedules(\/|\\\\).*/i
 const regexp_strings_ui = /Strings(\/|\\\\)UI/i
 const regexp_strings_events = /Strings(\/|\\\\)Events/i
+
+// Mail
+const regexp_mail = /Data(\/|\\\\)Mail/i
 
 // EventsLike
 const regexp_events = /Data(\/|\\\\)Events(\/|\\\\).*/i
@@ -55,6 +57,7 @@ export enum TargetType {
     NPCDispositions,
     NPCGiftTastes,
     MoviesReactions, // Entries为数据列表
+    Mail,
     Unknown = 0
 }
 
@@ -64,7 +67,6 @@ export class Target {
             regexp_dialogue,
             regexp_engagement_dialogue,
             regexp_extra_dialogue,
-            regexp_mail,
             regexp_special_order_strings,
             regexp_speech_bubbles,
             regexp_strings_characters,
@@ -86,6 +88,8 @@ export class Target {
             return TargetType.NPCGiftTastes
         } else if (regexp_movies_reactions.test(this.str)) {
             return TargetType.MoviesReactions
+        } else if (regexp_mail.test(this.str)) {
+            return TargetType.Mail
         }
         return TargetType.Unknown
     }

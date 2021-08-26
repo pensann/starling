@@ -109,11 +109,10 @@ export class TravFiles extends Traversor {
                             }
                         }
                     })
-                    // if (loadEdited) {
-                    //     change.FromFile = "empty.json"
-                    // }
-                    // changeList.push(change, ...editDataListNew)
-                    changeList.push(change)
+                    if (loadEdited) {
+                        change.FromFile = "empty.json"
+                    }
+                    changeList.push(change, ...editDataListNew)
                 } else {
                     changeList.push(change)
                 }

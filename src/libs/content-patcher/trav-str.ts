@@ -75,4 +75,22 @@ export class TravStr extends Traversor {
         }
         return strLi.join("/")
     }
+    public mail() {
+        const strLi = this.str.split(/\s*\[#]\s*/)
+        if (strLi.length <= 2) {
+            const [text, name] = strLi
+            const [plainText, item] = (_ => {
+                const i = text.match(/%item\s+.*\s+%%$/)
+                return [i ? text.slice(0, i.index) : text, i ? i[0] : ""]
+            })()
+            const nameHandled = this.traverse(name ? name : "", this.baseID + ".name")
+            return this.traverse(plainText, this.baseID + ".text")
+                + item
+                + (nameHandled ? "[#]" : "")
+                + nameHandled
+        } else {
+            Starlog.debug("Mail格式不正确")
+            throw new Error(this.str);
+        }
+    }
 }

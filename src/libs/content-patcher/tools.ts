@@ -5,6 +5,7 @@ import { join } from "path";
 import { Starlog } from "../log";
 import { parseJSON } from "../parser";
 import { Lang, REPEATED_ID_LIST, TRAV_RESULT_DICT } from "../traversor";
+import { exec } from "child_process";
 
 export function cpConvertToi18n(src: string, dist: string) {
     rmDir(dist)
@@ -18,6 +19,7 @@ export function cpConvertToi18n(src: string, dist: string) {
         join(dist, "i18n", "default.json"),
         JSON.stringify(TRAV_RESULT_DICT, undefined, 4)
     )
+    exec(`cp -r "${join(src, "content.json")}" "${join(dist, "content-origin.json")}"`)
     if (REPEATED_ID_LIST.length) {
         Starlog.warnning(`以下${REPEATED_ID_LIST.length}个ID重复`, REPEATED_ID_LIST)
     }

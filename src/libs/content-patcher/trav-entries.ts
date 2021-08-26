@@ -87,6 +87,10 @@ export class TravEntries extends Traversor {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .npcGiftTastes()
+                } else if (this.target.type == TargetType.Mail) {
+                    result[key] = this
+                        .textTrav(this.load(value), this.baseID + key)
+                        .mail()
                 }
             }
         }

@@ -44,7 +44,7 @@ class StardewStr {
         "$l": "$4",
         "$a": "$5"
     } as { [i: string]: string }
-    private traitRgexp = /{{[^{}]*?}}|\^|#|@|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
+    private traitRgexp = /{{[^{}]*?}}|\^|\||\[#]|#|@|%item|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 
 
