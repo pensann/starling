@@ -1,12 +1,21 @@
-import { buildTranslationProject, translateMod } from "./tools"
-import { buildTarget } from "./utils/builder"
-import { extractModStr, mergeDict } from "./utils/extrator"
+import { buildTarget } from "./libs/builder";
+import { parseJSON } from "./libs/parser";
+import { Translator } from "./libs/translator";
 
-const path = "res/SVE/sve.json"
-buildTranslationProject(path)
-// translateMod(path, { zip: false })
-// const dict = mergeDict(
-//     extractModStr("res/SVE1.13.10/Stardew Valley Expanded/[CP] Stardew Valley Expanded/content-backup.json"),
-//     extractModStr("res/SVE1.13.10/Stardew Valley Expanded/[CP] Stardew Valley Expanded/content.json", /[^\x00-\xff]/m)
-// ).toDictKV()
-// buildTarget("res/dict.json", JSON.stringify(dict, undefined, 2))
+let translator
+
+const transLi = [
+    "res/SVE/translator.json",
+    // "res/RSV/translator.json",
+    // "res/MNF/translator.json"
+]
+
+transLi.forEach(s => {
+    translator = new Translator(s)
+    // translator.buildProject()
+    translator.translate(true)
+})
+
+// const c = parseJSON("res/SVE/SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded/content.json")
+// const c = parseJSON("res/SVE/SVE-zh/content.json")
+// buildTarget("res/SVE/SVE-zh/content.json", JSON.stringify(c, undefined, 2))

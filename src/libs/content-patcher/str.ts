@@ -1,7 +1,12 @@
-class DialogueStr {
+class StardewStr {
     public str: string
     constructor(str: string) {
-        this.str = str
+        if (str) {
+            this.str = str
+        }
+        else {
+            this.str = ""
+        }
     }
     public get strBeauty() {
         return this.str
@@ -21,6 +26,16 @@ class DialogueStr {
     public fromString(str: string) {
         this.str = str.replaceAll(/\n\s*/g, "")
     }
+    public get containsText() {
+        return /[a-zA-Z]/.test(
+            this.strCompressed
+                .replaceAll(
+                    /\$(k|h|s|u|l|a)/gm,
+                    str => { return this.portrait_alias[str] }
+                )
+                .replaceAll(this.traitRgexp, "")
+        )
+    }
     private portrait_alias = {
         "$k": "$0",
         "$h": "$1",
@@ -28,8 +43,8 @@ class DialogueStr {
         "$u": "$3",
         "$l": "$4",
         "$a": "$5"
-    } as { [index: string]: string }
-    private traitRgexp = /{{[^{}]*?}}|\^|#|@|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
+    } as { [i: string]: string }
+    private traitRgexp = /{{[^{}]*?}}|\^|\||\[#]|#|@|%item|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 
 
@@ -40,4 +55,4 @@ function wrapAndIndent(str: string) {
     return wrap("\t" + str)
 }
 
-export { DialogueStr }
+export { StardewStr }

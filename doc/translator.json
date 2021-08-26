@@ -1,18 +1,25 @@
 {
-    "Name": "SVE1.13.9",
-    "Mods2BTrans": [
-        {
-            "Path": "res/SVE1.13.9/Stardew Valley Expanded/[CP] Stardew Valley Expanded",
-            "Type": "ContentPack",
-            "TranslationProject": "res/SVE-translate",
-            "FromMod":"res/SVE1.13.8/Stardew Valley Expanded/[CP] Stardew Valley Expanded"
-        },
-        {
-            "Path": "res/SVE1.13.9/Stardew Valley Expanded/[JA] Stardew Valley Expanded",
-            "Type": "JsonAssets",
-            "TranslationProject": "res/SVE1.13.8/Stardew Valley Expanded/[JA] Stardew Valley Expanded"
-        }
-    ],
-    "PackagePath": "res/SVE1.13.9",
-    "Target": "res/SVE1.13.9.zip"
+  "Name": "SVE1.13.11",
+  "src": "res/SVE",
+  "dist": "res/SVE/SVE-i18n",
+  "Mods": [
+    {
+      "Path": "SVE1.13.11/Stardew Valley Expanded/[CP] Stardew Valley Expanded",
+      "Type": "CP",
+      "Translation": {
+        "Lang": "zh",
+        "Project": "./cp-translation",
+        "From": "SVE1.13.10/Stardew Valley Expanded/.[CP] Stardew Valley Expanded"
+      }
+    },
+    {
+      "Path": "SVE1.13.11/Stardew Valley Expanded/[JA] Stardew Valley Expanded",
+      "Type": "JA",
+      "Translation": {
+        "Lang": "zh",
+        "Project": "./ja-translation",
+        "From": "SVE1.13.9/Stardew Valley Expanded/[JA] Stardew Valley Expanded"
+      }
+    }
+  ]
 }
