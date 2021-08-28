@@ -17,6 +17,15 @@ export const TRAV_INIT = () => {
     }
 }
 
+/**
+ * @param src
+ * @param dist
+ * @function textHandler 文本处理器
+ * @param textHArgs 文本处理器参数
+ * @param lang 语言枚举
+ * @param baseID (readonly)
+ * @function getTextID 获取文本的ID
+ */
 export class Traversor {
     // 路径
     public src: string = "."
@@ -34,16 +43,21 @@ export class Traversor {
                 return /./
         }
     }
-    constructor(baseID: string = "") {
+    constructor(baseID = "") {
         this.baseID = baseID
     }
     // ID处理
-    protected baseID: string
+    protected readonly baseID: string
     // 测试用
-    public getID(id: string, value: string) {
+    public getTextID(id: string, value: string, mode?: "sha1_4") {
+        // TODO
         const fmt = (id: string) => {
-            // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
-            return createHash("sha1").update(id).digest('hex').slice(0, 8)
+            switch (mode) {
+                case "sha1_4":
+                    return createHash("sha1").update(id).digest('hex').slice(0, 8)
+                default:
+                    return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
+            }
         }
         try {
             const idExists = (() => {
@@ -58,7 +72,6 @@ export class Traversor {
             if (idExists) {
                 return idExists
             } else {
-                // return id.replace(/\s+/g, "_").replace(/\/|\||=/g, ".")
                 return fmt(id)
             }
         } catch (error) {

@@ -25,7 +25,7 @@ export class TravEntries extends Traversor {
         trav.textHandler = this.textHandler
         trav.textHArgs = this.textHArgs
         trav.lang = this.lang
-        trav.getID = this.getID
+        trav.getTextID = this.getTextID
         return trav
     }
     public traverse(): Entries {

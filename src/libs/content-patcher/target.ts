@@ -4,18 +4,18 @@ import { basename } from "path";
 const data_movies_reactions = /Data(\/|\\\\)MoviesReactions/i
 
 // PlainText: 直接提取
+const strings_characters = /Strings(\/|\\\\)Characters/i
 const characters_dialogue = /Characters(\/|\\\\)Dialogue(\/|\\\\).*/i
 const data_engagement_dialogue = /Data(\/|\\\\)EngagementDialogue/i
 const data_extra_dialogue = /Data(\/|\\\\)ExtraDialogue/i
-const strings_special_order_strings = /Strings(\/|\\\\)SpecialOrderStrings/i
-const strings_speech_bubbles = /Strings(\/|\\\\)SpeechBubbles/i
-const strings_characters = /Strings(\/|\\\\)Characters/i
+const strings_events = /Strings(\/|\\\\)Events/i
 const strings_from_csfiles = /Strings(\/|\\\\)StringsFromCSFiles/i
 const strings_from_maps = /Strings(\/|\\\\)StringsFromMaps/i
 const strings_locations = /Strings(\/|\\\\)Locations/i
+const strings_special_order_strings = /Strings(\/|\\\\)SpecialOrderStrings/i
+const strings_speech_bubbles = /Strings(\/|\\\\)SpeechBubbles/i
 const strings_schedules = /Strings(\/|\\\\)Schedules(\/|\\\\).*/i
 const strings_ui = /Strings(\/|\\\\)UI/i
-const strings_events = /Strings(\/|\\\\)Events/i
 
 // Mail
 const data_mail = /Data(\/|\\\\)Mail/i

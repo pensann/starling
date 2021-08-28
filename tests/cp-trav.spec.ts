@@ -14,14 +14,14 @@ describe("trav-str.ts testing", () => {
     it("traverse plain text, extract text only", () => {
         const trav = new TravStr("aloha", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.plainText()
         expect({ "baseID": "aloha" }).toStrictEqual(TRAV_RESULT_DICT)
     })
     it("traverse plain text, handle and extract text", () => {
         const trav = new TravStr("aloha", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect("hiya!").toEqual(trav.plainText())
         expect({ "baseID": "aloha" }).toStrictEqual(TRAV_RESULT_DICT)
@@ -29,14 +29,14 @@ describe("trav-str.ts testing", () => {
     it("traverse events-like text, extract text only", () => {
         const trav = new TravStr("/speak someone \"aloha\"", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.eventsLike()
         expect({ "baseID.0": "aloha" }).toStrictEqual(TRAV_RESULT_DICT)
     })
     it("traverse events-like text, handle and extract text", () => {
         const trav = new TravStr("/speak someone \"aloha\"", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya\""
         expect("/speak someone \"hiya'\"").toEqual(trav.eventsLike())
         expect({ "baseID.0": "aloha" }).toStrictEqual(TRAV_RESULT_DICT)
@@ -47,7 +47,7 @@ describe("trav-str.ts testing", () => {
             "baseID"
         )
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.npcGiftTastes()
         expect({
             "baseID.0": "aloha",
@@ -63,7 +63,7 @@ describe("trav-str.ts testing", () => {
             "baseID"
         )
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect("hiya!//hiya!//hiya!/2/hiya!/3/hiya!/4/").toEqual(trav.npcGiftTastes())
         expect({
@@ -77,17 +77,38 @@ describe("trav-str.ts testing", () => {
     it("traverse npc dispositions text, extract text only", () => {
         const trav = new TravStr("/hi//////////Someone", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.npcDispositions()
         expect({ "baseID": "Someone" }).toStrictEqual(TRAV_RESULT_DICT)
     })
     it("traverse npc dispositions text, handle and extract text", () => {
         const trav = new TravStr("/hi//////////Someone", "baseID")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect("/hi//////////hiya!").toEqual(trav.npcDispositions())
         expect({ "baseID": "Someone" }).toStrictEqual(TRAV_RESULT_DICT)
+    })
+    it("traverse mail text, extract text only", () => {
+        const trav = new TravStr("@,^some text.^ -Someone%item quest 120 %%[#]Someone's Request", "baseID")
+        TRAV_INIT()
+        trav.getTextID = (s) => s
+        trav.mail()
+        expect({
+            "baseID.name": "Someone's Request",
+            "baseID.text": "@,^some text.^ -Someone"
+        }).toStrictEqual(TRAV_RESULT_DICT)
+    })
+    it("traverse mail text, handle and extract text", () => {
+        const trav = new TravStr("@,^some text.^ -Someone%item quest 120 %%[#]Someone's Request", "baseID")
+        TRAV_INIT()
+        trav.getTextID = (s) => s
+        trav.textHandler = (_) => "hiya!"
+        expect("hiya!%item quest 120 %%[#]hiya!").toEqual(trav.mail())
+        expect({
+            "baseID.name": "Someone's Request",
+            "baseID.text": "@,^some text.^ -Someone"
+        }).toStrictEqual(TRAV_RESULT_DICT)
     })
 })
 
@@ -97,7 +118,7 @@ describe("trav-entries.ts testing", () => {
         const trav = new TravEntries("Characters/Dialogue/Someone", entries, "[baseID]")
         TRAV_INIT()
         trav.i18n = { "some-key": "value" }
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({ 'key': 'hiya!' }).toStrictEqual(trav.traverse())
         expect({ '[baseID]key': 'value' }).toStrictEqual(TRAV_RESULT_DICT)
@@ -106,7 +127,7 @@ describe("trav-entries.ts testing", () => {
         const entries = { "key": "value" }
         const trav = new TravEntries("Characters/Dialogue/Someone", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_, id) => `{{i18n:${id}}}`
         expect({ 'key': '{{i18n:[baseID]key}}' }).toStrictEqual(trav.traverse())
         expect({ '[baseID]key': 'value' }).toStrictEqual(TRAV_RESULT_DICT)
@@ -115,7 +136,7 @@ describe("trav-entries.ts testing", () => {
         const entries = { "key": "value" }
         const trav = new TravEntries("Characters/Dialogue/Someone", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({ 'key': 'hiya!' }).toStrictEqual(trav.traverse())
         expect({ '[baseID]key': 'value' }).toStrictEqual(TRAV_RESULT_DICT)
@@ -124,7 +145,7 @@ describe("trav-entries.ts testing", () => {
         const entries = { "key": 'any string/speak someone "hi"/end dialogue someone "bye"' }
         const trav = new TravEntries("Data/Events/Someone", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({ "key": 'any string/speak someone "hiya!"/end dialogue someone "hiya!"' }).toStrictEqual(trav.traverse())
         expect({ "[baseID]key.0": "hi", "[baseID]key.1": "bye" }).toStrictEqual(TRAV_RESULT_DICT)
@@ -138,7 +159,7 @@ describe("trav-entries.ts testing", () => {
         }
         const trav = new TravEntries("Data/Festivals/Any", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({
             "set-up": "any string will be ignored...",
@@ -175,7 +196,7 @@ describe("trav-entries.ts testing", () => {
         }
         const trav = new TravEntries("Data/MoviesReactions", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({
             "Someone": {
@@ -206,7 +227,7 @@ describe("trav-entries.ts testing", () => {
         const entries = { "Someone": "//////null/////Someone" }
         const trav = new TravEntries("Data/NPCDispositions", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({ "Someone": "//////null/////hiya!" }).toStrictEqual(trav.traverse())
         expect({ "[baseID]Someone": "Someone" }).toStrictEqual(TRAV_RESULT_DICT)
@@ -215,7 +236,7 @@ describe("trav-entries.ts testing", () => {
         const entries = { "Someone": "aloha0//aloha1//aloha2//aloha3//aloha4/4/" }
         const trav = new TravEntries("Data/NPCGiftTastes", entries, "[baseID]")
         TRAV_INIT()
-        trav.getID = (s) => s
+        trav.getTextID = (s) => s
         trav.textHandler = (_) => "hiya!"
         expect({ "Someone": "hiya!//hiya!//hiya!//hiya!//hiya!/4/" }).toStrictEqual(trav.traverse())
         expect({

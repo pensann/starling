@@ -12,25 +12,28 @@ export class TravStr extends Traversor {
         super(baseID)
         this.str = str
     }
-    private traverse(value: string, id: string, returnEventStr = false): string {
+    private traverse(value: string, id: string, mode?: "EventText"): string {
         const trav = new TravStr(value, id)
-        trav.textHArgs = this.textHArgs
         trav.lang = this.lang
         trav.textHandler = this.textHandler
-        trav.getID = this.getID
-        if (returnEventStr) {
-            return trav.plainText().replaceAll(/"/g, "'")
-        } else {
-            return trav.plainText()
+        trav.textHArgs = this.textHArgs
+        trav.getTextID = this.getTextID
+        switch (mode) {
+            case "EventText":
+                return trav.plainText().replaceAll(/"/g, "'")
+            default:
+                return trav.plainText()
         }
     }
     public plainText(): string {
-        const id = this.getID(this.baseID, this.str)
-        if (this.re.test(this.str)) {
-            TRAV_RESULT_DICT[id] = this.str
-        }
-        if (this.str && this.textHandler) {
-            return this.textHandler(this.str, id, ...this.textHArgs)
+        const id = this.getTextID(this.baseID, this.str)
+        if (this.str) {
+            if (this.re.test(this.str)) {
+                TRAV_RESULT_DICT[id] = this.str
+            }
+            if (this.textHandler) {
+                return this.textHandler(this.str, id, ...this.textHArgs)
+            }
         }
         return this.str
     }
@@ -48,12 +51,11 @@ export class TravStr extends Traversor {
             let index = -1
             return this.str.replace(/\".*?\"/g, (s) => {
                 index++
-                return "\""
-                    + this.traverse(
-                        s.substring(1, s.length - 1),
-                        this.baseID + "." + index,
-                        true // 注意，这里调用traverse方法时注明了需要返回EventsStr。
-                    ) + "\""
+                return `"${this.traverse(
+                    s.slice(1, - 1),
+                    this.baseID + "." + index,
+                    "EventText" // 注意，这里调用traverse方法时注明了需要返回EventText。
+                )}"`
             })
         }
     }
@@ -75,22 +77,26 @@ export class TravStr extends Traversor {
         }
         return strLi.join("/")
     }
-    public mail() {
-        const strLi = this.str.split(/\s*\[#]\s*/)
-        if (strLi.length <= 2) {
-            const [text, name] = strLi
-            const [plainText, item] = (_ => {
-                const i = text.match(/%item\s+.*\s+%%$/)
-                return [i ? text.slice(0, i.index) : text, i ? i[0] : ""]
-            })()
-            const nameHandled = this.traverse(name ? name : "", this.baseID + ".name")
-            return this.traverse(plainText, this.baseID + ".text")
-                + item
-                + (nameHandled ? "[#]" : "")
-                + nameHandled
-        } else {
-            Starlog.debug("Mail格式不正确")
-            throw new Error(this.str);
-        }
+    public mail(): string {
+        const [text, name] = (_ => {
+            const m = this.str.match(/\[#]/)
+            return [
+                m ? this.str.slice(0, m.index) : this.str,
+                m ? this.str.slice(m.index! + 3) : ""
+            ]
+        })()
+
+        const [plainText, item] = (_ => {
+            const m = text.match(/%item\s+.*\s+%%/)
+            return [
+                m ? text.slice(0, m.index) : text,
+                m ? m[0] : ""
+            ]
+        })()
+
+        const textH = this.traverse(plainText, this.baseID + ".text") + item
+        const nameH = this.traverse(name ? name : "", this.baseID + ".name")
+
+        return textH + (nameH ? "[#]" + nameH : "")
     }
 }
