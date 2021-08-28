@@ -28,8 +28,8 @@ export class TravFiles extends Traversor {
             }
 
             if (this.textHandler) {
-                mail.Title = this.textHandler(title, undefined, ...this.args)
-                mail.Text = this.textHandler(text, undefined, ...this.args)
+                mail.Title = this.textHandler(title, undefined, ...this.textHArgs)
+                mail.Text = this.textHandler(text, undefined, ...this.textHArgs)
             }
         })
         if (this.textHandler) {

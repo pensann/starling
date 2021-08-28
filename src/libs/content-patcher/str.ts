@@ -1,9 +1,7 @@
 class StardewStr {
     public str: string
     constructor(str: string) {
-        if (str) {
-            this.str = str
-        }
+        if (str) { this.str = str }
         else {
             this.str = ""
         }

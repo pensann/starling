@@ -14,10 +14,10 @@ export class TravStr extends Traversor {
     }
     private traverse(value: string, id: string, returnEventStr = false): string {
         const trav = new TravStr(value, id)
-        trav.args = this.args
+        trav.textHArgs = this.textHArgs
         trav.lang = this.lang
         trav.textHandler = this.textHandler
-        trav.getIDMethod = this.getIDMethod
+        trav.getID = this.getID
         if (returnEventStr) {
             return trav.plainText().replaceAll(/"/g, "'")
         } else {
@@ -30,7 +30,7 @@ export class TravStr extends Traversor {
             TRAV_RESULT_DICT[id] = this.str
         }
         if (this.str && this.textHandler) {
-            return this.textHandler(this.str, id, ...this.args)
+            return this.textHandler(this.str, id, ...this.textHArgs)
         }
         return this.str
     }

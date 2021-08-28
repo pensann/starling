@@ -23,9 +23,9 @@ export class TravEntries extends Traversor {
     private textTrav(str: string, baseID: string): TravStr {
         const trav = new TravStr(str, baseID)
         trav.textHandler = this.textHandler
-        trav.args = this.args
+        trav.textHArgs = this.textHArgs
         trav.lang = this.lang
-        trav.getIDMethod = this.getIDMethod
+        trav.getID = this.getID
         return trav
     }
     public traverse(): Entries {

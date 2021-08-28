@@ -81,17 +81,17 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravCP(join(this.config.src, mod.Path))
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
 
                 // 使用unsafe遍历检查原模组是否存在错误
                 trav.traverseUnsafe("content.json")
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
 
 
                 // trav.traverseUnsafe("content.json")
                 trav.tranverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
@@ -108,10 +108,10 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravJA(src)
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
                 trav.traverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
@@ -126,10 +126,10 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravMFM(src)
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
                 trav.traverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                trav.emptyDict()
+                TRAV_RESULT_DICT_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
