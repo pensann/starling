@@ -3,7 +3,7 @@ import { TravEntries } from "./trav-entries";
 import { join, extname } from "path";
 import { buildTarget } from "../builder";
 import { Traversor, TRAV_RESULT_DICT } from "../traversor";
-import { Target, TargetType } from "./target";
+import { Target, TarFmt } from "./target";
 import { Starlog } from "../log";
 import { existsSync, statSync } from "fs";
 
@@ -81,9 +81,9 @@ export class TravFiles extends Traversor {
                         // 遍历器用到的假entries文件
                         const target = new Target(targetStr)
                         if (
-                            target.type == TargetType.PlainText
-                            || target.type == TargetType.EventsLike
-                            || target.type == TargetType.Festivals
+                            target.type == TarFmt.PlainText
+                            || target.type == TarFmt.EventsLike
+                            || target.type == TarFmt.Festivals
                         ) {
                             const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
                             const entries = parseJSON(join(this.src, file))

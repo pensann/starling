@@ -1,4 +1,4 @@
-import { Target, TargetType } from "./target";
+import { Target, TarFmt } from "./target";
 import { Traversor } from "../traversor";
 import { TravStr } from "./trav-str";
 export class TravEntries extends Traversor {
@@ -33,15 +33,15 @@ export class TravEntries extends Traversor {
         Object.assign(result, this.entries)
         for (const [key, value] of Object.entries(result as DictKV)) {
             if (value) {
-                if (this.target.type == TargetType.PlainText) {
+                if (this.target.type == TarFmt.PlainText) {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .plainText()
-                } else if (this.target.type == TargetType.EventsLike) {
+                } else if (this.target.type == TarFmt.EventsLike) {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .eventsLike()
-                } else if (this.target.type == TargetType.Festivals) {
+                } else if (this.target.type == TarFmt.Festivals) {
                     if (key == "set-up") {
                         // DO NOTHING
                     }
@@ -54,7 +54,7 @@ export class TravEntries extends Traversor {
                             .textTrav(this.load(value), this.baseID + key)
                             .plainText()
                     }
-                } else if (this.target.type == TargetType.MoviesReactions) {
+                } else if (this.target.type == TarFmt.MoviesReactions) {
                     let index = 0
                     const valueObject = result[key] as MoviesReactionValue
                     valueObject.Reactions.forEach((reaction) => {
@@ -79,15 +79,15 @@ export class TravEntries extends Traversor {
                         }
                         index++
                     })
-                } else if (this.target.type == TargetType.NPCDispositions) {
+                } else if (this.target.type == TarFmt.NPCDispositions) {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .npcDispositions()
-                } else if (this.target.type == TargetType.NPCGiftTastes) {
+                } else if (this.target.type == TarFmt.NPCGiftTastes) {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .npcGiftTastes()
-                } else if (this.target.type == TargetType.Mail) {
+                } else if (this.target.type == TarFmt.Mail) {
                     result[key] = this
                         .textTrav(this.load(value), this.baseID + key)
                         .mail()
