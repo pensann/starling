@@ -46,8 +46,9 @@ export class TravFiles extends Traversor {
         Starlog.info(`Traversing file: ${join(this.src, relPath)}`)
         const content = parseJSON(join(this.src, relPath)) as CommonContent
         const changeList = []
-        let loadEdited = false
+        let loadEdited
         for (let index = 0; index < content.Changes.length; index++) {
+            loadEdited = false
             const changeUnknownType: {
                 Action: BaseChange["Action"]
                 [index: string]: undefined | any
@@ -120,10 +121,8 @@ export class TravFiles extends Traversor {
                 changeList.push(changeUnknownType)
             }
         }
-        if (loadEdited) {
-            const fakeFile = join(this.dist, "empty.json")
-            buildTarget(fakeFile, "{}")
-        }
+        const fakeFile = join(this.dist, "empty.json")
+        buildTarget(fakeFile, "{}")
         console.log("")
         content["Changes"] = changeList
         if (this.textHandler) {

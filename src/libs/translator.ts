@@ -13,6 +13,32 @@ import { TravFiles as TravJA } from "./json-assets/trav-files";
 import { TravFiles as TravMFM } from "./mail-framework/trav-files";
 import { mfmTranslate } from "./mail-framework/tools";
 
+function getCurrentTime() {
+    var date = new Date();//当前时间
+    var month = zeroFill(date.getMonth() + 1);//月
+    var day = zeroFill(date.getDate());//日
+    var hour = zeroFill(date.getHours());//时
+    var minute = zeroFill(date.getMinutes());//分
+    var second = zeroFill(date.getSeconds());//秒
+
+    //当前时间
+    var curTime = date.getFullYear() + "-" + month + "-" + day
+        + "-" + hour + "-" + minute + "-" + second;
+
+    return curTime;
+}
+
+/**
+ * 补零
+ */
+function zeroFill(i: number) {
+    if (i >= 0 && i <= 9) {
+        return "0" + i;
+    } else {
+        return i;
+    }
+}
+
 interface translatorConfig {
     Name: string
     src: string
@@ -132,14 +158,14 @@ export class Translator {
                 cpi18nTranslate(dist, dict, Lang.zh)
             } else if (mod.Type == "JA") {
                 jaTranslate(src, dist, dict, Lang.zh)
-            }else if (mod.Type == "MFM"){
+            } else if (mod.Type == "MFM") {
                 mfmTranslate(src, dist, dict, Lang.zh)
             }
         })
         const cmd =
             `cd '${resolve(this.config.dist)}'`
             + " && zip -q -r -9"
-            + ` '${this.config.Name}.zip' *`
+            + ` '${this.config.Name + "-" + getCurrentTime()}.zip' *`
             + " -x '*.DS_Store'"
             + " && open ."
         if (zip) {
