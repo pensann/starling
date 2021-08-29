@@ -119,11 +119,14 @@ export class TravFiles extends Traversor {
                                 if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
 
                                 // 保存遍历结果
-                                editDataListNew.push({
-                                    Action: "EditData",
-                                    Target: target.str,
-                                    Entries: trav.traverse()
-                                })
+                                const entries = trav.traverse()
+                                if (Object.keys(entries).length) {
+                                    editDataListNew.push({
+                                        Action: "EditData",
+                                        Target: target.str,
+                                        Entries: entries
+                                    })
+                                }
                             }
                         }
                     })

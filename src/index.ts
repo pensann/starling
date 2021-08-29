@@ -12,7 +12,7 @@ const transLi = [
 
 transLi.forEach(s => {
     translator = new Translator(s)
-    translator.buildProject()
+    // translator.buildProject()
     translator.translate()
 })
 
