@@ -110,6 +110,34 @@ describe("trav-str.ts testing", () => {
             "baseID.text": "@,^some text.^ -Someone"
         }).toStrictEqual(TRAV_RESULT_DICT)
     })
+    // "Location/Meet The Wizard/You received a letter from the local wizard. He claims to have information regarding the old community center./Enter the wizard's tower./WizardHouse/-1/0/-1/false"
+    it("traverse quest text, extract text only", () => {
+        const trav = new TravStr("/title/details/hint////reward description//reaction", "baseID")
+        TRAV_INIT()
+        trav.getTextID = (s) => s
+        trav.textHandler = (_) => "hiya!"
+        trav.quests()
+        expect({
+            "baseID.1": "title",
+            "baseID.2": "details",
+            "baseID.3": "hint",
+            "baseID.7": "reward description",
+            "baseID.9": "reaction"
+        }).toStrictEqual(TRAV_RESULT_DICT)
+    })
+    it("traverse quest text, handle and extract text", () => {
+        const trav = new TravStr("/title/details/hint////reward description/", "baseID")
+        TRAV_INIT()
+        trav.getTextID = (s) => s
+        trav.textHandler = (_) => "hiya!"
+        expect("/hiya!/hiya!/hiya!////hiya!/").toEqual(trav.quests())
+        expect({
+            "baseID.1": "title",
+            "baseID.2": "details",
+            "baseID.3": "hint",
+            "baseID.7": "reward description",
+        }).toStrictEqual(TRAV_RESULT_DICT)
+    })
 })
 
 describe("trav-entries.ts testing", () => {

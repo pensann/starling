@@ -49,7 +49,7 @@ export class Traversor {
     // ID处理
     protected readonly baseID: string
     // 测试用
-    public getTextID(id: string, value: string, mode?: "sha1_4") {
+    public getTextID(id: string, value: string, mode = "sha1_4") {
         // TODO
         const fmt = (id: string) => {
             switch (mode) {

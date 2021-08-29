@@ -61,23 +61,20 @@ export class TravStr extends Traversor {
     }
     public npcGiftTastes(): string {
         const strLi = this.str.split(/\s*\/\s*/)
-        // 遍历字符串文字，其中模2片段为需要翻译的字符串
-        for (let index = 0; index < strLi.length; index++) {
-            if (!(index % 2)) {
-                strLi[index] = this.traverse(strLi[index], this.baseID + "." + index / 2)
-            }
-        }
+        const _ = [0, 2, 4, 6, 8].forEach(i => {
+            strLi[i] = this.traverse(strLi[i], this.baseID + "." + i / 2)
+        })
         return strLi.join("/")
     }
     public npcDispositions() {
         const strLi = this.str.split(/\s*\/\s*/)
         const index = 11
-        if (strLi[index]) {
-            strLi[index] = this.traverse(strLi[index], this.baseID)
-        }
+        strLi[index] = this.traverse(strLi[index], this.baseID)
         return strLi.join("/")
     }
     public mail(): string {
+        // 注意，在使用非global正则时，完成第一次匹配时立即返回结果。
+        // 即认为字符串中仅包含1个item和1个[#]
         const [text, name] = (_ => {
             const m = this.str.match(/\[#]/)
             return [
@@ -85,7 +82,6 @@ export class TravStr extends Traversor {
                 m ? this.str.slice(m.index! + 3) : ""
             ]
         })()
-
         const [plainText, item] = (_ => {
             const m = text.match(/%item\s+.*\s+%%/)
             return [
@@ -93,10 +89,19 @@ export class TravStr extends Traversor {
                 m ? m[0] : ""
             ]
         })()
-
         const textH = this.traverse(plainText, this.baseID + ".text") + item
         const nameH = this.traverse(name ? name : "", this.baseID + ".name")
 
         return textH + (nameH ? "[#]" + nameH : "")
+    }
+    public quests(): string {
+        const strLi = this.str.split(/\s*\/\s*/)
+        const _ = [1, 2, 3, 7].forEach(i => {
+            strLi[i] = this.traverse(strLi[i], this.baseID + "." + i)
+        })
+        if (strLi.length - 1 == 9) {
+            strLi[9] = this.traverse(strLi[9], this.baseID + "." + 9)
+        }
+        return strLi.join("/")
     }
 }

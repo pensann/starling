@@ -14,7 +14,6 @@ export class TravFiles extends Traversor {
     }
     private getChangeID(change: CommonFields): string {
         return change.Target + (() => {
-            // return change.Action + change.Target + (() => {
             let str = ""
             if (change.When) {
                 str += "[When]"
@@ -39,40 +38,56 @@ export class TravFiles extends Traversor {
                 buildTarget(join(this.dist, "i18n", this.lang + ".json"), "{}")
             }
         } else {
-            this.traverseUnsafe("content.json")
+            this.traverseFile("content.json")
         }
     }
-    public traverseUnsafe(relPath: string): void {
-        Starlog.info(`Traversing file: ${join(this.src, relPath)}`)
-        const content = parseJSON(join(this.src, relPath)) as CommonContent
+    public traverseFile(relPath: string): void {
+        const content: CommonContent = parseJSON(join(this.src, relPath))
         const changeList = []
-        let loadEdited
-        for (let index = 0; index < content.Changes.length; index++) {
-            loadEdited = false
+
+        const FLAGS = {
+            loadEdited: false,
+            createEmptyFile: false
+        }
+
+        const len = content.Changes.length
+
+        Starlog.info(`Traversing file: ${join(this.src, relPath)}`)
+        for (let index = 0; index < len; index++) {
+            const percent = String(index * 100 / len).slice(0, 4) + "%"
+            Starlog.infoOneLine(`Loading change ${percent}`)
+
             const changeUnknownType: {
                 Action: BaseChange["Action"]
                 [index: string]: undefined | any
             } = content.Changes[index]
-            const percent = String(index * 100 / content.Changes.length).slice(0, 4) + "%"
-            Starlog.infoOneLine(`Loading change ${percent}`)
+
             if (changeUnknownType.Action == "Include") {
                 const change = changeUnknownType as Include
                 change.FromFile.split(/\s*,\s*/).forEach((file) => {
-                    this.traverseUnsafe(file)
+                    this.traverseFile(file)
                 })
             } else if (changeUnknownType.Action == "EditData") {
                 const change = changeUnknownType as EditData
                 if (change.Entries) {
-                    const trav = new TravEntries(change.Target, change.Entries, this.getChangeID(change))
-                    const i18nFile = join(this.src, "i18n", this.lang + ".json")
+                    const trav = new TravEntries(
+                        change.Target,
+                        change.Entries, this.getChangeID(change)
+                    )
                     trav.lang = this.lang
-                    trav.textHandler = this.textHandler
-                    if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
-                    change.Entries = trav.traverse()
+                    if (!this.textHandler) {
+                        if (!change.When || (change.When && change.When["language"] == this.lang)) trav.traverse()
+                    } else {
+                        const i18nFile = join(this.src, "i18n", this.lang + ".json")
+                        trav.textHandler = this.textHandler
+                        if (existsSync(i18nFile)) { trav.i18n = parseJSON(i18nFile) }
+                        change.Entries = trav.traverse()
+                    }
                 }
                 changeList.push(change)
                 // TODO 支持Field等其它字段翻译
             } else if (changeUnknownType.Action == "Load") {
+                FLAGS.loadEdited = false
                 const change = changeUnknownType as Load
                 if (extname(change.FromFile) == ".json") {
                     const targetList = change.Target.split(/\s*,\s*/)
@@ -85,16 +100,18 @@ export class TravFiles extends Traversor {
                             || target.type == TarFmt.EventsLike
                             || target.type == TarFmt.Festivals
                         ) {
-                            const file = change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath)
-                            const entries = parseJSON(join(this.src, file))
-                            const trav = new TravEntries(target.str, entries, this.getChangeID(change))
+                            const trav = new TravEntries(
+                                target.str,
+                                parseJSON(join(this.src, change.FromFile.replace(/{{TargetWithoutPath}}/gi, target.strWithoutPath))),
+                                this.getChangeID(change)
+                            )
                             trav.lang = this.lang
                             if (!this.textHandler) {
                                 // 不处理文本的话，直接遍历
-                                trav.traverse()
+                                if (!change.When || (change.When && change.When["language"] == this.lang)) trav.traverse()
                             } else {
                                 // 处理文本
-                                loadEdited = true
+                                FLAGS.loadEdited = true
                                 const i18nFile = join(this.src, "i18n", this.lang + "json")
 
                                 // 设置遍历器
@@ -106,11 +123,12 @@ export class TravFiles extends Traversor {
                                     Action: "EditData",
                                     Target: target.str,
                                     Entries: trav.traverse()
-                                } as EditData)
+                                })
                             }
                         }
                     })
-                    if (loadEdited) {
+                    if (FLAGS.loadEdited) {
+                        FLAGS.createEmptyFile = true
                         change.FromFile = "empty.json"
                     }
                     changeList.push(change, ...editDataListNew)
@@ -121,17 +139,12 @@ export class TravFiles extends Traversor {
                 changeList.push(changeUnknownType)
             }
         }
-        const fakeFile = join(this.dist, "empty.json")
-        buildTarget(fakeFile, "{}")
-        console.log("")
+        if (FLAGS.createEmptyFile) {
+            buildTarget(join(this.dist, "empty.json"), "{}")
+        }
         content["Changes"] = changeList
         if (this.textHandler) {
-            buildTarget(
-                join(
-                    this.dist ? this.dist : this.src,
-                    relPath
-                ),
-                JSON.stringify(content, undefined, 4))
+            buildTarget(join(this.dist ? this.dist : this.src, relPath), JSON.stringify(content, undefined, 4))
         }
     }
 }

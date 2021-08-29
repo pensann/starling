@@ -7,7 +7,7 @@ import { Starlog } from "./log";
 import { parseJSON } from "./parser";
 import { loadProject, mergeDict } from "./stardict";
 
-import { Lang, TRAV_RESULT_DICT } from "./traversor";
+import { Lang, TRAV_RESULT_DICT, TRAV_INIT } from "./traversor";
 import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { TravFiles as TravJA } from "./json-assets/trav-files";
 import { TravFiles as TravMFM } from "./mail-framework/trav-files";
@@ -81,26 +81,23 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravCP(join(this.config.src, mod.Path))
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
 
-                // 使用unsafe遍历检查原模组是否存在错误
-                trav.traverseUnsafe("content.json")
-                TRAV_RESULT_DICT_INIT()
+                // 使用traverseFile遍历检查原模组是否存在错误
+                trav.traverseFile("content.json")
+                TRAV_INIT()
 
 
-                // trav.traverseUnsafe("content.json")
                 trav.tranverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
-                // trav.traverseUnsafe("content.json")
                 trav.tranverse()
 
                 trav.src = src
                 trav.lang = mod.Translation.Lang
-                // trav.traverseUnsafe("content.json")
                 trav.tranverse()
 
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
@@ -108,10 +105,10 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravJA(src)
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
                 trav.traverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
@@ -126,10 +123,10 @@ export class Translator {
                 const dictOri: DictKV = {}
 
                 const trav = new TravMFM(src)
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
                 trav.traverse()
                 Object.assign(dictOri, TRAV_RESULT_DICT)
-                TRAV_RESULT_DICT_INIT()
+                TRAV_INIT()
 
                 trav.src = from
                 trav.lang = mod.Translation.Lang
