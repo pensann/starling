@@ -79,7 +79,7 @@ export class Target {
             return TarFmt.Unknown
         } else {
             Starlog.warnning(`未知target:${this.str}`)
-            throw new Error("DEBUG");
+            throw new Error(`未知target:${this.str}`);
             return TarFmt.Unknown
         }
     }

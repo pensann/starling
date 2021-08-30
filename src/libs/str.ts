@@ -8,6 +8,9 @@ class StardewStr {
     }
     public get strBeauty() {
         return this.str
+            .replaceAll(">","⇨")
+            .replaceAll("<","⇦")
+            .replaceAll(/\n/gm,"\\n")
             .replaceAll(/#\$(q|e|b)/gm, wrap)
             .replaceAll(/#\$r/gm, wrapAndIndent)
     }
@@ -42,7 +45,7 @@ class StardewStr {
         "$l": "$4",
         "$a": "$5"
     } as { [i: string]: string }
-    private traitRgexp = /{{[^{}]*?}}|\^|\||\[#]|#|@|%item|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
+    private traitRgexp = /{{[^{}]*?}}|\^|\||\[#]|#|@|%item\s+.*\s+%%|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 
 

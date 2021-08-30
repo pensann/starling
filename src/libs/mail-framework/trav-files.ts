@@ -16,7 +16,6 @@ export class TravFiles extends Traversor {
         const srcFile = join(this.src, "mail.json")
         const distFile = join(this.dist, basename(srcFile))
         const content: Mail[] = parseJSON(srcFile)
-        Starlog.debug(srcFile)
         content.forEach(mail => {
             const title = mail.Title
             const text = mail.Text

@@ -5,7 +5,7 @@ import { Translator } from "./libs/translator";
 let translator
 
 const transLi = [
-    // "res/SVE/translator.json",
+    "res/SVE/translator.json",
     "res/RSV/translator.json",
     // "res/MNF/translator.json"
 ]

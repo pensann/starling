@@ -52,10 +52,10 @@ export class TravFiles extends Traversor {
 
         const len = content.Changes.length
 
-        Starlog.info(`Traversing file: ${join(this.src, relPath)}`)
         for (let index = 0; index < len; index++) {
+            FLAGS.loadEdited = false
             const percent = String(index * 100 / len).slice(0, 4) + "%"
-            Starlog.infoOneLine(`Loading change ${percent}`)
+            Starlog.infoOneLine(`Loading ${percent}: ${join(this.src, relPath)}`)
 
             const changeUnknownType: {
                 Action: BaseChange["Action"]
@@ -87,7 +87,6 @@ export class TravFiles extends Traversor {
                 changeList.push(change)
                 // TODO 支持Field等其它字段翻译
             } else if (changeUnknownType.Action == "Load") {
-                FLAGS.loadEdited = false
                 const change = changeUnknownType as Load
                 if (extname(change.FromFile) == ".json") {
                     const targetList = change.Target.split(/\s*,\s*/)
@@ -142,6 +141,7 @@ export class TravFiles extends Traversor {
                 changeList.push(changeUnknownType)
             }
         }
+        Starlog.info(`traversed file: ${join(this.src, relPath)}`)
         if (FLAGS.createEmptyFile) {
             buildTarget(join(this.dist, "empty.json"), "{}")
         }

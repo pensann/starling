@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import { existsSync, rmdirSync } from "fs";
 import { basename, join, resolve } from "path";
-import { cpConvertToi18n, cpi18nTranslate } from "./content-patcher/tools";
+import { cpConvertToi18n } from "./content-patcher/tools";
 import { jaTranslate } from "./json-assets/tools";
 import { Starlog } from "./log";
 import { parseJSON } from "./parser";
@@ -12,6 +12,7 @@ import { TravFiles as TravCP } from "./content-patcher/trav-files";
 import { TravFiles as TravJA } from "./json-assets/trav-files";
 import { TravFiles as TravMFM } from "./mail-framework/trav-files";
 import { mfmTranslate } from "./mail-framework/tools";
+import { buildTarget } from "./builder";
 
 function getCurrentTime() {
     var date = new Date();//当前时间
@@ -39,6 +40,25 @@ function zeroFill(i: number) {
     }
 }
 
+
+export function i18nTranslate(cpPath: string, dict: DictKV, lang: Lang) {
+    const i18nFile = join(cpPath, "i18n", "default.json")
+    const targetFile = join(cpPath, "i18n", lang + ".json")
+    const content: DictKV = parseJSON(i18nFile)
+    for (const [key, value] of Object.entries(content)) {
+        const valueNew = dict[value]
+        if (valueNew) {
+            content[key] = valueNew
+        } else {
+            delete content[key]
+        }
+    }
+    buildTarget(
+        join(targetFile),
+        JSON.stringify(content, undefined, 4)
+    )
+}
+
 interface translatorConfig {
     Name: string
     src: string
@@ -46,7 +66,7 @@ interface translatorConfig {
     Mods: [
         {
             Path: string,
-            Type: "CP" | "JA" | "MFM"
+            Type: "CP" | "JA" | "MFM" | "i18n"
             Translation: {
                 Lang: Lang
                 Project: string
@@ -137,6 +157,11 @@ export class Translator {
                 trav.lang = mod.Translation.Lang
                 trav.traverse()
                 mergeDict(dictOri, TRAV_RESULT_DICT).toTranslationProject(projectFolder)
+            } else if (mod.Type == "i18n") {
+                mergeDict(
+                    parseJSON(join(src, "i18n", "default.json")),
+                    parseJSON(join(from, "i18n", mod.Translation.Lang + ".json")),
+                ).toTranslationProject(join(this.config.src, mod.Translation.Project))
             }
         })
     }
@@ -152,11 +177,16 @@ export class Translator {
             const dist = join(this.config.dist, basename(mod.Path))
             if (mod.Type == "CP") {
                 cpConvertToi18n(src, dist)
-                cpi18nTranslate(dist, dict, Lang.zh)
+                i18nTranslate(dist, dict, mod.Translation.Lang)
             } else if (mod.Type == "JA") {
-                jaTranslate(src, dist, dict, Lang.zh)
+                jaTranslate(src, dist, dict, mod.Translation.Lang)
             } else if (mod.Type == "MFM") {
-                mfmTranslate(src, dist, dict, Lang.zh)
+                mfmTranslate(src, dist, dict, mod.Translation.Lang)
+            } else if (mod.Type == "i18n") {
+                buildTarget(join(dist, "i18n", "default.json"), JSON.stringify(
+                    parseJSON(join(src, "i18n", "default.json")), undefined, 2)
+                )
+                i18nTranslate(dist, dict, mod.Translation.Lang)
             }
         })
         const cmd =

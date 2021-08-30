@@ -25,31 +25,12 @@ export function cpConvertToi18n(src: string, dist: string) {
         execSync(`cp -r "${join(src, "content.json")}" "${join(dist, "content-origin.json")}"`)
         if (REPEATED_ID_LIST.length) {
             Starlog.warnning(`以下${REPEATED_ID_LIST.length}个ID重复`, REPEATED_ID_LIST)
+            buildTarget("res/REPEATED_ID_LIST.json", JSON.stringify(REPEATED_ID_LIST, undefined, 2))
         }
     } else {
-        trav.textHandler = s => s
-        trav.traverseFile("content.json")
         buildTarget(
             join(dist, "i18n", "default.json"),
             JSON.stringify(parseJSON(i18nFile), undefined, 4)
         )
     }
-}
-
-export function cpi18nTranslate(cpPath: string, dict: DictKV, lang: Lang) {
-    const i18nFile = join(cpPath, "i18n", "default.json")
-    const targetFile = join(cpPath, "i18n", lang + ".json")
-    const content: DictKV = parseJSON(i18nFile)
-    for (const [key, value] of Object.entries(content)) {
-        const valueNew = dict[value]
-        if (valueNew) {
-            content[key] = valueNew
-        } else {
-            delete content[key]
-        }
-    }
-    buildTarget(
-        join(targetFile),
-        JSON.stringify(content, undefined, 4)
-    )
 }

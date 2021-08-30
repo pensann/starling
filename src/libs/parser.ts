@@ -33,9 +33,14 @@ function parseXMLStr(str: string) {
         if (err) throw err
         if (res.entries.entry) {
             res.entries.entry.forEach((entry: any) => {
-                entries[entry.$.id] = entry._ ? entry._
-                    .replace(/\n/gm, "")
-                    .replace(/^\s*|\s*$/gm, "") : entry._
+                entries[entry.$.id] = entry._ ?
+                    entry._
+                        .replace(/\n/gm, "")
+                        .replace(/^\s*|\s*$/gm, "")
+                        .replace(/\\n/gm, "\n")
+                        .replaceAll("⇨", ">")
+                        .replaceAll("⇦", "<")
+                    : entry._
             })
         }
     })

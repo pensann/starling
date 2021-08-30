@@ -1,5 +1,5 @@
 import { join, resolve } from "path";
-import { StardewStr } from "./content-patcher/str";
+import { StardewStr } from "./str";
 import { create } from "xmlbuilder2"
 import { Starlog } from "./log";
 import { buildTarget } from "./builder";
@@ -8,6 +8,7 @@ import { parseJSON, parseXML } from "./parser";
 class StarDict {
     [index: number]: {
         id: string,
+        target?: string,
         origin: string,
         alter: string[]
     } | undefined
