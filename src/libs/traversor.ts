@@ -24,7 +24,7 @@ export const TRAV_INIT = () => {
  * @param textHArgs 文本处理器参数
  * @param lang 语言枚举
  * @param baseID (readonly)
- * @function getTextID 获取文本的ID
+ * @function getTextID 计算文本的ID
  */
 export class Traversor {
     // 路径

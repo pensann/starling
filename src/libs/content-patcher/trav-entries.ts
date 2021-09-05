@@ -1,7 +1,6 @@
 import { Target, TarFmt } from "./target";
 import { Traversor } from "../traversor";
 import { TravStr } from "./trav-str";
-import { Starlog } from "../log";
 export class TravEntries extends Traversor {
     public entries: Entries
     public target: Target
@@ -92,19 +91,4 @@ export class TravEntries extends Traversor {
         }
         return this.entries
     }
-
-//     public fixEvents(): Entries {
-//         if (this.target.type == TarFmt.EventsLike) {
-//             for (const [key, value] of Object.entries(this.entries as DictKV)) {
-//                 // fix for RSV!
-//                 if(value){
-//                     this.entries[key] = value.replace(/"\s*#/g, _ => {
-//                         Starlog.debug(`fixed : ${key}`)
-//                         return "#"
-//                     })
-//                 }
-//             }
-//         }
-//         return this.entries
-//     }
 }

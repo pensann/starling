@@ -18,7 +18,8 @@
     "start": "ts-node-dev --transpile-only src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "test-c": "jest --coverage"
+    "test-c": "jest --coverage",
+    "lab":"ts-node-dev --transpile-only src/lab.ts"
   },
   "jest": {
     "testEnvironment": "node"
