@@ -1,13 +1,5 @@
 import { basename } from "path";
 import { Starlog } from "../log";
-// "/"隔开, 格式1
-
-
-// "/"隔开, 格式2
-
-// 不处理
-
-// * Do more here...
 
 export enum TarFmt {
     PlainText = 1,
@@ -28,53 +20,53 @@ export class Target {
     }
     public get type(): TarFmt {
         if (this.test(
-            /Strings(\/|\\\\)Characters/i,
-            /Characters(\/|\\\\)Dialogue(\/|\\\\).*/i,
-            /Data(\/|\\\\)EngagementDialogue/i,
-            /Data(\/|\\\\)ExtraDialogue/i,
-            /Strings(\/|\\\\)Events/i,
-            /Strings(\/|\\\\)StringsFromCSFiles/i,
-            /Strings(\/|\\\\)StringsFromMaps/i,
-            /Strings(\/|\\\\)Locations/i,
-            /Strings(\/|\\\\)SpecialOrderStrings/i,
-            /Strings(\/|\\\\)SpeechBubbles/i,
-            /Strings(\/|\\\\)Schedules(\/|\\\\).*/i,
-            /Strings(\/|\\\\)UI/i,
-            /Data(\/|\\\\)TV(\/|\\\\)TipChannel/i,
+            /Strings\/Characters/i,
+            /Characters\/Dialogue\/.*/i,
+            /Data\/EngagementDialogue/i,
+            /Data\/ExtraDialogue/i,
+            /Strings\/Events/i,
+            /Strings\/StringsFromCSFiles/i,
+            /Strings\/StringsFromMaps/i,
+            /Strings\/Locations/i,
+            /Strings\/SpecialOrderStrings/i,
+            /Strings\/SpeechBubbles/i,
+            /Strings\/Schedules\/.*/i,
+            /Strings\/UI/i,
+            /Data\/TV\/TipChannel/i,
         )) {
             return TarFmt.PlainText
-        } else if (this.test(/Data(\/|\\\\)Events(\/|\\\\).*/i)) {
+        } else if (this.test(/Data\/Events\/.*/i)) {
             return TarFmt.EventsLike
-        } else if (this.test(/Data(\/|\\\\)Festivals(\/|\\\\).*/i)/** PlainText or EventsLike not include "set-up" */) {
+        } else if (this.test(/Data\/Festivals\/.*/i)/** PlainText or EventsLike not include "set-up" */) {
             return TarFmt.Festivals
-        } else if (this.test(/Data(\/|\\\\)NPCDispositions/i)) {
+        } else if (this.test(/Data\/NPCDispositions/i)) {
             return TarFmt.NPCDispositions
-        } else if (this.test(/Data(\/|\\\\)NPCGiftTastes/i)) {
+        } else if (this.test(/Data\/NPCGiftTastes/i)) {
             return TarFmt.NPCGiftTastes
-        } else if (this.test(/Data(\/|\\\\)MoviesReactions/i)) {
+        } else if (this.test(/Data\/MoviesReactions/i)) {
             return TarFmt.MoviesReactions
-        } else if (this.test(/Data(\/|\\\\)Mail/i)) {
+        } else if (this.test(/Data\/Mail/i)) {
             return TarFmt.Mail
-        } else if (this.test(/Data(\/|\\\\)Quests/i)) {
+        } else if (this.test(/Data\/Quests/i)) {
             return TarFmt.Quests
         } else if (this.test(
-            /Characters(\/|\\\\)Schedules(\/|\\\\).*/i,
-            /Data(\/|\\\\)(Aquarium)?Fish/i,
-            /Data(\/|\\\\)Locations/i,
-            /Data(\/|\\\\)AntiSocialNPCs/i,
-            /Data(\/|\\\\)CustomNPCExclusions/i,
-            /Data(\/|\\\\)SpecialOrders/i,
-            /Data(\/|\\\\)BigCraftablesInformation/i,
-            /Data(\/|\\\\)CustomWeddingGuestPositions/i,
-            /Data(\/|\\\\)ObjectContextTags/i,
-            /Data(\/|\\\\)ChairTiles/i,
-            /Data(\/|\\\\)WarpNetwork(\/|\\\\)Destinations/i,
-            /Data(\/|\\\\)ObjectInformation/i,
-            /Data(\/|\\\\)CraftingRecipes/i,
-            /Mods(\/|\\\\)Bouhm\.NPCMapLocations(\/|\\\\)(NPCs|Locations)/i,
-            /Data(\/|\\\\)ConcessionTastes/i,
-            /Data(\/|\\\\)AnimationDescriptions/i, // 据说需要处理
-            /Strings(\/|\\\\)AnimationDescriptions/i, // 据说需要处理
+            /Characters\/Schedules\/.*/i,
+            /Data\/(Aquarium)?Fish/i,
+            /Data\/Locations/i,
+            /Data\/AntiSocialNPCs/i,
+            /Data\/CustomNPCExclusions/i,
+            /Data\/SpecialOrders/i,
+            /Data\/BigCraftablesInformation/i,
+            /Data\/CustomWeddingGuestPositions/i,
+            /Data\/ObjectContextTags/i,
+            /Data\/ChairTiles/i,
+            /Data\/WarpNetwork\/Destinations/i,
+            /Data\/ObjectInformation/i,
+            /Data\/CraftingRecipes/i,
+            /Mods\/Bouhm\.NPCMapLocations\/(NPCs|Locations)/i,
+            /Data\/ConcessionTastes/i,
+            /Data\/AnimationDescriptions/i, // 据说需要处理
+            /Strings\/AnimationDescriptions/i, // 据说需要处理
         )) {
             return TarFmt.Unknown
         } else {

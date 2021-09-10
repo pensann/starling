@@ -8,7 +8,6 @@ import { parseJSON, parseXML } from "./parser";
 class StarDict {
     [index: number]: {
         id: string,
-        target?: string,
         origin: string,
         alter: string[]
     } | undefined

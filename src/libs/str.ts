@@ -1,4 +1,9 @@
-class StardewStr {
+const ESCAPE_DICT: { [i: string]: string | CallableFunction } = {
+    ">": "⇨",
+    "<": "⇦",
+    "\n": "\\n",
+}
+export class StardewStr {
     public str: string
     constructor(str: string) {
         if (str) { this.str = str }
@@ -8,9 +13,9 @@ class StardewStr {
     }
     public get strBeauty() {
         return this.str
-            .replaceAll(">","⇨")
-            .replaceAll("<","⇦")
-            .replaceAll(/\n/gm,"\\n")
+            .replaceAll(">", "⇨")
+            .replaceAll("<", "⇦")
+            .replaceAll(/\n/gm, "\\n")
             .replaceAll(/#\$(q|e|b)/gm, wrap)
             .replaceAll(/#\$r/gm, wrapAndIndent)
     }
@@ -37,14 +42,14 @@ class StardewStr {
                 .replaceAll(this.traitRgexp, "")
         )
     }
-    private portrait_alias = {
+    private portrait_alias: DictKV = {
         "$k": "$0",
         "$h": "$1",
         "$s": "$2",
         "$u": "$3",
         "$l": "$4",
         "$a": "$5"
-    } as { [i: string]: string }
+    }
     private traitRgexp = /{{[^{}]*?}}|\^|\||\[#]|#|@|%item\s+.*\s+%%|%fork|%adj|%noun|%place|%spouse|%name|%firstnameletter|%time|%band|%book|%rival|%pet|%farm|%favorite|%kid1|%kid2|^%|\$(e|b|q\s*-?\d*\s*-?\d*|r\s*-?\d*\s*-?\d*\s*\w*|\d*)/gm
 }
 
@@ -55,5 +60,3 @@ function wrap(str: string) {
 function wrapAndIndent(str: string) {
     return wrap("\t" + str)
 }
-
-export { StardewStr }

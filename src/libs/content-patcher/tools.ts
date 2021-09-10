@@ -1,4 +1,4 @@
-import { rmDir } from "../rmdir";
+import { rmDirRecursion } from "../rmdir";
 import { TravFiles } from "./trav-files";
 import { buildTarget } from "../builder";
 import { join } from "path";
@@ -9,7 +9,7 @@ import { execSync } from "child_process";
 import { existsSync } from "fs";
 
 export function cpConvertToi18n(src: string, dist: string) {
-    rmDir(dist)
+    rmDirRecursion(dist)
     const trav = new TravFiles(src)
     const i18nFile = join(src, "i18n", "default.json")
     trav.dist = dist
